@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sentimate</title>
+    <link rel="stylesheet" href="/static/css/elderly-friendly.css">
     <style>
         * {
             margin: 0;
@@ -16,12 +17,19 @@
             background-color: #f5f3f0;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
             padding: 30px 20px;
         }
 
-        .container {
+        .home-card {
             background: #fffbf8;
             border-radius: 20px;
             padding: 80px 60px;
@@ -86,7 +94,7 @@
         }
 
         @media (max-width: 600px) {
-            .container {
+            .home-card {
                 padding: 50px 30px;
             }
 
@@ -109,15 +117,34 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">Sentimate</div>
+            <div class="navbar-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/medication" class="nav-link">Reminders</a>
+                <a href="/games" class="nav-link">Games</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
-        <h1>Sentimate</h1>
-        
-        <div class="nav-buttons">
-            <a href="/chat" style="text-decoration: none;">
-                <button class="nav-button btn-chat">💬 Chat Companion</button>
-            </a>
-            <button class="nav-button btn-medication">💊 Medication Reminder</button>
-            <button class="nav-button btn-games">🧠 Brain Games</button>
+        <div class="home-card">
+            <h1>Sentimate</h1>
+            
+            <div class="nav-buttons">
+                <a href="/chat" style="text-decoration: none;">
+                    <button class="nav-button btn-chat">Chat Companion</button>
+                </a>
+                <a href="/medication" style="text-decoration: none;">
+                    <button class="nav-button btn-medication">Medication Reminder</button>
+                </a>
+                <a href="/games" style="text-decoration: none;">
+                    <button class="nav-button btn-games">Brain Games</button>
+                </a>
+            </div>
         </div>
     </div>
 </body>

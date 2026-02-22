@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Games - Sentimate</title>
+    <link rel="stylesheet" href="/static/css/elderly-friendly.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f3f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        header {
+            background-color: #c8d4b8;
+            color: #1a1a1a;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .btn-back {
+            background-color: #6b8e6f;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-back:hover {
+            background-color: #5a7660;
+            transform: translateY(-2px);
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-bar {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .score-text {
+            color: #333;
+        }
+
+        .score-number {
+            color: #c8d4b8;
+            font-size: 1.5em;
+        }
+
+        .question-section {
+            display: none;
+        }
+
+        .question-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .question-counter {
+            font-size: 1.1em;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            padding: 20px 25px;
+            font-size: 1.2em;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: left;
+            color: #333;
+        }
+
+        .option-btn:hover {
+            border-color: #c8d4b8;
+            background-color: #f9f9f9;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            background-color: #c8d4b8;
+            border-color: #c8d4b8;
+            color: #1a1a1a;
+        }
+
+        .option-btn.correct {
+            background-color: #a8d4a8;
+            border-color: #a8d4a8;
+        }
+
+        .option-btn.incorrect {
+            background-color: #d4a8a8;
+            border-color: #d4a8a8;
+        }
+
+        .btn-next {
+            background-color: #c8d4b8;
+            color: #1a1a1a;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            height: 55px;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background-color: #b8c4a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(200, 212, 184, 0.3);
+        }
+
+        .btn-next:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+
+        .completion-section {
+            display: none;
+            text-align: center;
+        }
+
+        .completion-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: 600;
+            color: #c8d4b8;
+            margin: 40px 0;
+        }
+
+        .completion-message {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn-restart {
+            background-color: #c8d4b8;
+            color: #1a1a1a;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            height: 55px;
+            margin-right: 15px;
+        }
+
+        .btn-restart:hover {
+            background-color: #b8c4a8;
+            transform: translateY(-2px);
+        }
+
+        .btn-group-completion {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .game-container {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 1.3em;
+            }
+
+            .option-btn {
+                padding: 18px 20px;
+                font-size: 1.1em;
+            }
+
+            .score-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .btn-group-completion {
+                flex-direction: column;
+            }
+
+            .btn-restart {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            button.btn-back {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .final-score {
+                font-size: 2.5em;
+            }
+
+            .completion-message {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">Sentimate</div>
+            <div class="navbar-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/medication" class="nav-link">Reminders</a>
+                <a href="/games" class="nav-link">Games</a>
+            </div>
+        </div>
+    </nav>
+
+    <button class="btn-back" onclick="goHome()">← Back</button>
+
+    <header>
+        <h1>Brain Games</h1>
+    </header>
+
+    <div class="container">
+        <div class="game-container">
+            <div class="score-bar">
+                <span class="score-text">Score:</span>
+                <span class="score-number"><span id="currentScore">0</span>/10</span>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quizSection">
+                <div id="questionSection" class="question-section active">
+                    <div class="question-counter" id="questionCounter">Question 1 of 10</div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options" id="optionsContainer"></div>
+                    <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+
+                <div id="completionSection" class="completion-section">
+                    <h2>Quiz Complete!</h2>
+                    <div class="completion-message">Great job! You've completed the quiz.</div>
+                    <div class="final-score" id="finalScore">0/10</div>
+                    <div id="feedbackMessage" class="completion-message"></div>
+                    <div class="btn-group-completion">
+                        <button class="btn-restart" onclick="restartQuiz()">Play Again</button>
+                        <button class="btn-restart" style="background-color: #6b8e6f; color: white;" onclick="goHome()">Back to Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizQuestions = [
+            {
+                question: "What is the capital of France?",
+                options: ["London", "Paris", "Berlin", "Madrid"],
+                correct: 1
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1
+            },
+            {
+                question: "What is 15 + 8?",
+                options: ["20", "23", "25", "30"],
+                correct: 1
+            },
+            {
+                question: "Who wrote Romeo and Juliet?",
+                options: ["Mark Twain", "Jane Austen", "William Shakespeare", "Charles Dickens"],
+                correct: 2
+            },
+            {
+                question: "What color is the sky on a clear day?",
+                options: ["Green", "Blue", "Red", "Yellow"],
+                correct: 1
+            },
+            {
+                question: "How many days are in a week?",
+                options: ["5", "6", "7", "8"],
+                correct: 2
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+                correct: 3
+            },
+            {
+                question: "What do you use to write?",
+                options: ["Fork", "Pencil", "Spoon", "Knife"],
+                correct: 1
+            },
+            {
+                question: "How many legs does a dog have?",
+                options: ["2", "4", "6", "8"],
+                correct: 1
+            },
+            {
+                question: "What is the opposite of hot?",
+                options: ["Warm", "Cold", "Cool", "Freezing"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const questionCounter = document.getElementById('questionCounter');
+        const currentScoreDisplay = document.getElementById('currentScore');
+        const questionSection = document.getElementById('questionSection');
+        const completionSection = document.getElementById('completionSection');
+        const finalScore = document.getElementById('finalScore');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+
+        function displayQuestion() {
+            const question = quizQuestions[currentQuestion];
+            
+            questionText.textContent = question.question;
+            questionCounter.textContent = `Question ${currentQuestion + 1} of ${quizQuestions.length}`;
+            
+            optionsContainer.innerHTML = question.options
+                .map((option, index) => `
+                    <button class="option-btn" onclick="selectOption(${index})">
+                        ${option}
+                    </button>
+                `)
+                .join('');
+            
+            selectedAnswer = null;
+            nextBtn.disabled = true;
+        }
+
+        function selectOption(index) {
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            
+            buttons[index].classList.add('selected');
+            selectedAnswer = index;
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            const question = quizQuestions[currentQuestion];
+            
+            if (selectedAnswer === question.correct) {
+                score++;
+                currentScoreDisplay.textContent = score;
+            }
+            
+            currentQuestion++;
+            
+            if (currentQuestion < quizQuestions.length) {
+                displayQuestion();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            questionSection.classList.remove('active');
+            completionSection.classList.add('active');
+            
+            finalScore.textContent = `${score}/10`;
+            
+            let message = '';
+            if (score === 10) {
+                message = 'Perfect score! You are amazing!';
+            } else if (score >= 8) {
+                message = 'Excellent work! You did very well!';
+            } else if (score >= 6) {
+                message = 'Good job! You got more than half right!';
+            } else if (score >= 4) {
+                message = 'Not bad! Keep practicing!';
+            } else {
+                message = 'Nice try! Better luck next time!';
+            }
+            
+            feedbackMessage.textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            currentScoreDisplay.textContent = '0';
+            
+            questionSection.classList.add('active');
+            completionSection.classList.remove('active');
+            
+            displayQuestion();
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // ===== INACTIVITY DETECTION =====
+        let inactivityAlertShown = false;
+
+        function initializeInactivityDetection() {
+            // Update activity on page load
+            updateUserActivity();
+            
+            // Update activity on user interactions
+            document.addEventListener('click', updateUserActivity);
+            document.addEventListener('keypress', updateUserActivity);
+            document.addEventListener('mousemove', updateUserActivity);
+            
+            // Check inactivity every minute
+            setInterval(checkUserInactivity, 60000);
+        }
+
+        function updateUserActivity() {
+            fetch('/update_activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: 'web_user' }),
+            })
+            .catch(error => console.error('Error updating activity:', error));
+        }
+
+        function checkUserInactivity() {
+            fetch('/check_inactivity')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_inactive && !inactivityAlertShown) {
+                        inactivityAlertShown = true;
+                        showInactivityAlert(data.message);
+                    } else if (!data.is_inactive) {
+                        inactivityAlertShown = false;
+                    }
+                })
+                .catch(error => console.error('Error checking inactivity:', error));
+        }
+
+        function showInactivityAlert(message) {
+            // Create alert modal
+            const alertContainer = document.createElement('div');
+            alertContainer.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                max-width: 500px;
+                text-align: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            `;
+            
+            alertContainer.innerHTML = `
+                <h2 style="color: #c8d4b8; margin-bottom: 15px; font-size: 1.5em;">Just Checking In</h2>
+                <p style="color: #333; font-size: 1.1em; margin-bottom: 25px; line-height: 1.6;">
+                    ${message}
+                </p>
+                <button onclick="this.parentElement.parentElement.remove(); updateUserActivity();" style="
+                    background-color: #c8d4b8;
+                    color: #1a1a1a;
+                    padding: 12px 30px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 1.1em;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                ">
+                    I'm Still Here
+                </button>
+            `;
+            
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+            `;
+            overlay.onclick = () => {
+                overlay.remove();
+                alertContainer.remove();
+                updateUserActivity();
+            };
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(alertContainer);
+        }
+
+        // Initialize
+        displayQuestion();
+        initializeInactivityDetection();
+    </script>
+</body>
+</html>

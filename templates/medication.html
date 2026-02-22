@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Reminder - Sentimate</title>
+    <link rel="stylesheet" href="/static/css/elderly-friendly.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f3f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        header {
+            background-color: #d4a574;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section h2 {
+            color: #d4a574;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="time"] {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="time"]:focus {
+            outline: none;
+            border-color: #d4a574;
+            box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 150px;
+            height: 55px;
+        }
+
+        .btn-add {
+            background-color: #d4a574;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-add:hover {
+            background-color: #c49464;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+
+        .btn-add:active {
+            transform: translateY(0);
+        }
+
+        .btn-back {
+            background-color: #6b8e6f;
+            color: white;
+            margin: 15px 0 0 0;
+            align-self: flex-start;
+        }
+
+        .btn-back:hover {
+            background-color: #5a7660;
+            transform: translateY(-2px);
+        }
+
+        .reminders-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .reminders-section h2 {
+            color: #d4a574;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .reminder-item {
+            background-color: #f9f9f9;
+            border-left: 5px solid #d4a574;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .reminder-info {
+            flex: 1;
+        }
+
+        .reminder-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .reminder-time {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .btn-delete {
+            background-color: #c9544f;
+            color: white;
+            padding: 10px 20px;
+            min-width: auto;
+            height: auto;
+            margin-left: 15px;
+        }
+
+        .btn-delete:hover {
+            background-color: #b94440;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            font-size: 1.2em;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-section,
+            .reminders-section {
+                padding: 20px;
+            }
+
+            .form-section h2,
+            .reminders-section h2 {
+                font-size: 1.5em;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                min-width: unset;
+            }
+
+            input[type="text"],
+            input[type="time"] {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+
+            .reminder-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-delete {
+                margin-left: 0;
+                margin-top: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">Sentimate</div>
+            <div class="navbar-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/medication" class="nav-link">Reminders</a>
+                <a href="/games" class="nav-link">Games</a>
+            </div>
+        </div>
+    </nav>
+
+    <button class="btn-back" onclick="goHome()">← Back</button>
+
+    <header>
+        <h1>Medication Reminder</h1>
+    </header>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Add New Reminder</h2>
+            
+            <div class="form-group">
+                <label for="medicineName">Medicine Name:</label>
+                <input 
+                    type="text" 
+                    id="medicineName" 
+                    placeholder="e.g., Aspirin, Vitamin D"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="medicineTime">Time:</label>
+                <input 
+                    type="time" 
+                    id="medicineTime"
+                >
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-add" onclick="addReminder()">Add Reminder</button>
+            </div>
+        </div>
+
+        <div class="reminders-section">
+            <h2>Your Reminders</h2>
+            <div id="remindersList">
+                <div class="empty-state">
+                    No reminders yet. Add one to get started!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const medicineNameInput = document.getElementById('medicineName');
+        const medicineTimeInput = document.getElementById('medicineTime');
+        const remindersList = document.getElementById('remindersList');
+
+        let reminders = [];
+
+        /**
+         * Display a friendly notification message to the user
+         * @param {string} message - The message to display
+         * @param {string} type - Message type: 'success', 'error', 'info'
+         */
+        function showMessage(message, type = 'info') {
+            // Create notification element if it doesn't exist
+            let notification = document.getElementById('notification');
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.id = 'notification';
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 20px 30px;
+                    border-radius: 10px;
+                    font-size: 1.1em;
+                    z-index: 5000;
+                    min-width: 300px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                `;
+                document.body.appendChild(notification);
+            }
+
+            // Set color based on message type
+            const colors = {
+                'success': '#6b8e6f',
+                'error': '#d9534f',
+                'info': '#5bc0de'
+            };
+
+            notification.style.backgroundColor = colors[type] || colors['info'];
+            notification.style.color = 'white';
+            notification.textContent = message;
+            notification.style.display = 'block';
+
+            // Auto-hide after 4 seconds
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000);
+        }
+
+        // Load reminders from server on page load
+        async function loadReminders() {
+            try {
+                const response = await fetch('/get_reminders');
+                if (!response.ok) {
+                    throw new Error('Failed to load reminders');
+                }
+                const data = await response.json();
+                reminders = data.reminders || [];
+                renderReminders();
+            } catch (error) {
+                console.error('Error loading reminders:', error);
+                showMessage('Unable to load reminders. Please refresh the page.', 'error');
+            }
+        }
+
+        function renderReminders() {
+            if (reminders.length === 0) {
+                remindersList.innerHTML = '<div class="empty-state">No reminders yet. Add one to get started!</div>';
+                return;
+            }
+
+            // Sort by time
+            reminders.sort((a, b) => a.time.localeCompare(b.time));
+
+            remindersList.innerHTML = reminders
+                .map((reminder) => `
+                    <div class="reminder-item">
+                        <div class="reminder-info">
+                            <div class="reminder-name">${escapeHtml(reminder.medicine_name)}</div>
+                            <div class="reminder-time">Time: ${reminder.time}</div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteReminder(${reminder.id})">Delete</button>
+                    </div>
+                `)
+                .join('');
+        }
+
+        async function addReminder() {
+            const name = medicineNameInput.value.trim();
+            const time = medicineTimeInput.value.trim();
+
+            // Validate medicine name
+            if (!name) {
+                showMessage('Please enter a medicine name', 'error');
+                medicineNameInput.focus();
+                return;
+            }
+
+            // Validate time
+            if (!time) {
+                showMessage('Please select a time for your reminder', 'error');
+                medicineTimeInput.focus();
+                return;
+            }
+
+            try {
+                const response = await fetch('/add_reminder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ medicine_name: name, time: time }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Clear form
+                    medicineNameInput.value = '';
+                    medicineTimeInput.value = '';
+                    medicineNameInput.focus();
+                    
+                    // Show success message
+                    showMessage(`Added reminder for ${name} at ${time}`, 'success');
+                    
+                    // Reload reminders from server
+                    await loadReminders();
+                } else {
+                    // Show server error message
+                    const errorMsg = data.error || 'Failed to add reminder';
+                    showMessage(errorMsg, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Could not add reminder. Please check your connection and try again.', 'error');
+            }
+        }
+
+        async function deleteReminder(id) {
+            // Confirm deletion with user-friendly message
+            if (!confirm('Remove this medicine reminder?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/delete_reminder/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    showMessage('Reminder deleted', 'success');
+                    // Reload reminders from server
+                    await loadReminders();
+                } else {
+                    showMessage('Could not delete reminder. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Could not delete the reminder. Please try again.', 'error');
+            }
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Allow Enter key to add reminder
+        medicineTimeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addReminder();
+            }
+        });
+
+        medicineNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addReminder();
+            }
+        });
+
+        // Load reminders from server on page load
+        window.addEventListener('load', () => {
+            loadReminders();
+            medicineNameInput.focus();
+            initializeInactivityDetection();
+        });
+
+        // ===== INACTIVITY DETECTION =====
+        let inactivityAlertShown = false;
+
+        function initializeInactivityDetection() {
+            // Update activity on page load
+            updateUserActivity();
+            
+            // Update activity on user interactions
+            document.addEventListener('click', updateUserActivity);
+            document.addEventListener('keypress', updateUserActivity);
+            document.addEventListener('mousemove', updateUserActivity);
+            
+            // Check inactivity every minute
+            setInterval(checkUserInactivity, 60000);
+        }
+
+        function updateUserActivity() {
+            fetch('/update_activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: 'web_user' }),
+            })
+            .catch(error => console.error('Error updating activity:', error));
+        }
+
+        function checkUserInactivity() {
+            fetch('/check_inactivity')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_inactive && !inactivityAlertShown) {
+                        inactivityAlertShown = true;
+                        showInactivityAlert(data.message);
+                    } else if (!data.is_inactive) {
+                        inactivityAlertShown = false;
+                    }
+                })
+                .catch(error => console.error('Error checking inactivity:', error));
+        }
+
+        function showInactivityAlert(message) {
+            // Create alert modal
+            const alertContainer = document.createElement('div');
+            alertContainer.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                z-index: 10000;
+                max-width: 500px;
+                text-align: center;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            `;
+            
+            alertContainer.innerHTML = `
+                <h2 style="color: #d4a574; margin-bottom: 15px; font-size: 1.5em;">Just Checking In</h2>
+                <p style="color: #333; font-size: 1.1em; margin-bottom: 25px; line-height: 1.6;">
+                    ${message}
+                </p>
+                <button onclick="this.parentElement.parentElement.remove(); updateUserActivity();" style="
+                    background-color: #d4a574;
+                    color: white;
+                    padding: 12px 30px;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 1.1em;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                ">
+                    I'm Still Here
+                </button>
+            `;
+            
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+            `;
+            overlay.onclick = () => {
+                overlay.remove();
+                alertContainer.remove();
+                updateUserActivity();
+            };
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(alertContainer);
+        }
+    </script>
+</body>
+</html>
