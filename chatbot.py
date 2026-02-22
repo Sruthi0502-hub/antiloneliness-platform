@@ -457,6 +457,7 @@ def get_response(
     username: Optional[str] = None,
     history: Optional[List[Dict]] = None,
     display_name: Optional[str] = None,
+    forced_language: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate a warm, context-aware chatbot response.
@@ -484,14 +485,15 @@ def get_response(
             "language": "english",
         }
 
-    is_tamil     = _is_tamil(message)
+    # Language resolution: user preference beats auto-detection
+    is_tamil     = True if forced_language == 'tamil' else _is_tamil(message)
     message_lower = message.lower()
     history      = history or []
     responses    = TA_RESPONSES if is_tamil else EN_RESPONSES
     followups    = TA_FOLLOWUPS if is_tamil else EN_FOLLOWUPS
     lang         = "tamil" if is_tamil else "english"
 
-    # ── 1. Name extraction ──────────────────────────────────
+    # -- 1. Name extraction --
     detected_name: Optional[str] = _extract_name(message_lower if not is_tamil else message)
 
     # ── 2. Name-intro special response ──────────────────────

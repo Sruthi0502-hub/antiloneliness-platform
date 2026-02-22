@@ -1,351 +1,221 @@
 """
-Text-to-Speech Module
-Convert text to speech with support for Tamil and English languages.
-Uses pyttsx3 for offline speech synthesis and supports multiple voices and speeds.
+Text-to-Speech Module for Sentimate
+Converts text to speech, supporting both Tamil and English.
 
-Supported Languages:
-- English (en-US)
-- Tamil (ta-IN) - with gTTS fallback option
+Primary function:
+    speak_text(text, language='english') — browser-safe gTTS version (returns base64 MP3)
+    speak_text_server(text, language)    — server-console version using pyttsx3 fallback
+
+The Flask app uses the /speak_response endpoint (in app.py) for browser TTS.
+This module provides the speak_text() function that can be imported and used
+directly in Python scripts or the voice chatbot integration.
 """
 
-import pyttsx3
-from typing import Optional, Dict, Literal
-import os
+import io
+import base64
+from typing import Optional
 
-# ===== CONFIGURATION =====
+# ============================================================
+# LANGUAGE CONFIGURATION
+# ============================================================
 
-# Supported languages
-SUPPORTED_LANGUAGES = {
+LANGUAGE_CODES = {
     'english': 'en',
-    'tamil': 'ta'
+    'tamil':   'ta',
+    'en':      'en',
+    'ta':      'ta',
+    'en-us':   'en',
+    'ta-in':   'ta',
 }
 
-# Default language
 DEFAULT_LANGUAGE = 'english'
 
-# Speech configuration
-SPEECH_CONFIG = {
-    'rate': 150,              # Speed of speech in words per minute
-    'volume': 0.9,            # Volume level (0.0 to 1.0)
-    'language': DEFAULT_LANGUAGE  # Default language
-}
 
-# ===== UTILITY FUNCTIONS =====
+def _get_lang_code(language: str) -> str:
+    """Return gTTS language code for the given language name."""
+    return LANGUAGE_CODES.get(language.lower().strip(), 'en')
 
-def initialize_engine() -> pyttsx3.Engine:
+
+# ============================================================
+# PRIMARY API — gTTS (browser-compatible, works for Tamil)
+# ============================================================
+
+def speak_text(text: str, language: str = 'english') -> Optional[str]:
     """
-    Initialize and configure the text-to-speech engine.
-    
+    Convert text to speech using gTTS and return a base64-encoded MP3 string.
+
+    This is the primary TTS function for the Sentimate platform.
+    Supports both English and Tamil.
+
+    Args:
+        text:     The text to speak.
+        language: 'english' or 'tamil' (also accepts 'en', 'ta', BCP-47 codes).
+
     Returns:
-        Configured pyttsx3 Engine instance
+        Base64-encoded MP3 audio string (suitable for embedding in HTML audio src),
+        or None if conversion fails.
+
+    Usage in browser (via Flask):
+        audio_b64 = speak_text("Hello!", "english")
+        # Use with: <audio src="data:audio/mpeg;base64,{audio_b64}">
+
+    Usage in Python script:
+        audio_b64 = speak_text("வணக்கம்!", "tamil")
+        if audio_b64:
+            # Save to file or stream
     """
-    engine = pyttsx3.init()
-    
-    # Set speech rate (slower for elderly users)
-    engine.setProperty('rate', SPEECH_CONFIG['rate'])
-    
-    # Set volume
-    engine.setProperty('volume', SPEECH_CONFIG['volume'])
-    
-    return engine
+    try:
+        from gtts import gTTS
+
+        if not text or not text.strip():
+            return None
+
+        lang_code = _get_lang_code(language)
+        tts = gTTS(text=text.strip(), lang=lang_code, slow=False)
+
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        return base64.b64encode(buf.read()).decode('utf-8')
+
+    except ImportError:
+        print("[text_to_speech] gTTS not installed. Run: pip install gTTS")
+        return None
+    except Exception as e:
+        print(f"[text_to_speech] speak_text error: {e}")
+        return None
 
 
-def get_available_voices() -> Dict[str, list]:
+def speak_text_slow(text: str, language: str = 'english') -> Optional[str]:
     """
-    Get available voices for all languages.
-    
+    Same as speak_text() but with slower speech rate — better for elderly users.
+
+    Args:
+        text:     Text to convert.
+        language: Target language.
+
     Returns:
-        Dictionary mapping language to list of available voices
+        Base64-encoded MP3 string, or None on failure.
     """
-    engine = initialize_engine()
-    voices = engine.getProperty('voices')
-    
-    available = {'english': [], 'tamil': []}
-    
-    for voice in voices:
-        # Check language
-        if 'english' in voice.languages or 'en' in voice.languages or 'en_US' in voice.languages:
-            available['english'].append({
-                'id': voice.id,
-                'name': voice.name,
-                'gender': voice.gender if hasattr(voice, 'gender') else 'unknown'
-            })
-        elif 'tamil' in str(voice.languages).lower() or 'ta' in str(voice.languages):
-            available['tamil'].append({
-                'id': voice.id,
-                'name': voice.name,
-                'gender': voice.gender if hasattr(voice, 'gender') else 'unknown'
-            })
-    
-    return available
-
-
-def set_voice_by_language(engine: pyttsx3.Engine, language: Optional[str] = None) -> None:
-    """
-    Set engine voice based on language.
-    
-    Args:
-        engine: pyttsx3 Engine instance
-        language: Language name ('english' or 'tamil')
-    """
-    if language is None:
-        language = DEFAULT_LANGUAGE
-    
-    language = language.lower().strip()
-    
-    voices = engine.getProperty('voices')
-    
-    # Find suitable voice for language
-    for voice in voices:
-        voice_languages = str(voice.languages).lower()
-        
-        if language == 'english' and ('en' in voice_languages or 'english' in voice_languages):
-            engine.setProperty('voice', voice.id)
-            return
-        elif language == 'tamil' and ('ta' in voice_languages or 'tamil' in voice_languages):
-            engine.setProperty('voice', voice.id)
-            return
-    
-    # If no specific voice found, use system default
-    if voices:
-        engine.setProperty('voice', voices[0].id)
-
-
-# ===== MAIN SPEECH FUNCTION =====
-
-def speak_text(text: str, language: Optional[str] = None, rate: Optional[int] = None) -> None:
-    """
-    Convert text to speech and play it.
-    
-    Converts provided text to speech using system text-to-speech engine.
-    Supports English and Tamil languages with configurable speech rate.
-    
-    Args:
-        text: The text to convert to speech
-        language: Language for speech ('english' or 'tamil'). Defaults to 'english'.
-        rate: Speech rate in words per minute (default: 150, slower for elderly users)
-        
-    Raises:
-        ValueError: If language is not supported or text is empty
-        RuntimeError: If speech synthesis fails
-    """
-    # Validate input
-    if text is None or not isinstance(text, str):
-        raise ValueError("Text must be a non-empty string")
-    
-    text = text.strip()
-    if not text:
-        raise ValueError("Text cannot be empty")
-    
-    if language is None:
-        language = DEFAULT_LANGUAGE
-    
-    language = language.lower().strip()
-    if language not in SUPPORTED_LANGUAGES:
-        supported = ', '.join(SUPPORTED_LANGUAGES.keys())
-        raise ValueError(f"Language '{language}' not supported. Supported: {supported}")
-    
     try:
-        # Initialize engine
-        engine = initialize_engine()
-        
-        # Set language-specific voice
-        set_voice_by_language(engine, language)
-        
-        # Set speech rate if provided
-        if rate is not None and isinstance(rate, int):
-            if 50 <= rate <= 300:  # Reasonable range for speech rate
-                engine.setProperty('rate', rate)
-        
-        # Speak the text
-        print(f"Speaking ({language}): {text[:50]}{'...' if len(text) > 50 else ''}")
-        engine.say(text)
+        from gtts import gTTS
+
+        if not text or not text.strip():
+            return None
+
+        lang_code = _get_lang_code(language)
+        tts = gTTS(text=text.strip(), lang=lang_code, slow=True)
+
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        return base64.b64encode(buf.read()).decode('utf-8')
+
+    except Exception as e:
+        print(f"[text_to_speech] speak_text_slow error: {e}")
+        return None
+
+
+def speak_text_to_file(text: str, language: str = 'english', filepath: str = 'output.mp3') -> bool:
+    """
+    Save TTS audio to an MP3 file on disk.
+
+    Args:
+        text:     Text to speak.
+        language: Target language.
+        filepath: Destination file path.
+
+    Returns:
+        True on success, False on failure.
+    """
+    try:
+        from gtts import gTTS
+
+        if not text or not text.strip():
+            return False
+
+        lang_code = _get_lang_code(language)
+        tts = gTTS(text=text.strip(), lang=lang_code, slow=False)
+        tts.save(filepath)
+        return True
+
+    except Exception as e:
+        print(f"[text_to_speech] speak_text_to_file error: {e}")
+        return False
+
+
+# ============================================================
+# SERVER-CONSOLE VERSION — pyttsx3 (offline, no Tamil support)
+# ============================================================
+
+def speak_text_console(text: str, language: str = 'english', slow: bool = False) -> bool:
+    """
+    Speak text through the system's speakers using pyttsx3 (offline).
+    NOTE: Tamil is NOT supported by pyttsx3 — it falls back to English TTS voice
+    and will mispronounce Tamil text. Use speak_text() with the browser for Tamil.
+
+    Args:
+        text:     Text to speak.
+        language: Language hint (affects speech rate, not voice for Tamil).
+        slow:     Use slow speech rate (default: False).
+
+    Returns:
+        True on success, False on failure.
+    """
+    try:
+        import pyttsx3
+
+        if not text or not text.strip():
+            return False
+
+        engine = pyttsx3.init()
+        engine.setProperty('volume', 0.9)
+        engine.setProperty('rate', 120 if slow else 150)
+        engine.say(text.strip())
         engine.runAndWait()
-        
+        engine.stop()
+        return True
+
     except Exception as e:
-        raise RuntimeError(f"Failed to generate speech: {str(e)}")
+        print(f"[text_to_speech] speak_text_console error: {e}")
+        return False
 
 
-# ===== SPEECH CONTROL FUNCTIONS =====
+# ============================================================
+# LANGUAGE UTILITIES
+# ============================================================
 
-def speak_text_with_pause(text: str, language: Optional[str] = None) -> None:
-    """
-    Speak text with a slight pause before and after for clarity.
-    
-    Args:
-        text: The text to speak
-        language: Language for speech
-    """
-    try:
-        engine = initialize_engine()
-        set_voice_by_language(engine, language)
-        
-        # Add slight pause for clarity
-        engine.say(text)
-        engine.runAndWait()
-        
-    except Exception as e:
-        raise RuntimeError(f"Failed to speak text: {str(e)}")
+def get_supported_languages() -> dict:
+    """Return a dict of supported language names and their gTTS codes."""
+    return {'english': 'en', 'tamil': 'ta'}
 
 
-def speak_text_file(file_path: str, language: Optional[str] = None) -> None:
-    """
-    Read and speak text from a file.
-    
-    Args:
-        file_path: Path to text file to read and speak
-        language: Language for speech
-        
-    Raises:
-        ValueError: If file not found or cannot be read
-        RuntimeError: If speech synthesis fails
-    """
-    if not os.path.exists(file_path):
-        raise ValueError(f"File not found: {file_path}")
-    
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            text = f.read()
-        
-        speak_text(text, language)
-    
-    except IOError as e:
-        raise ValueError(f"Cannot read file: {str(e)}")
+def is_language_supported(language: str) -> bool:
+    """Check if a language is supported by speak_text()."""
+    return language.lower().strip() in LANGUAGE_CODES
 
 
-def speak_text_slow(text: str, language: Optional[str] = None) -> None:
-    """
-    Speak text at a slower, more elderly-friendly pace.
-    Ideal for important information that needs emphasis.
-    
-    Args:
-        text: The text to speak slowly
-        language: Language for speech
-    """
-    # Slower rate for elderly users (default 150, slow is 100)
-    speak_text(text, language, rate=100)
+# ============================================================
+# CLI TEST
+# ============================================================
 
+if __name__ == '__main__':
+    import sys
 
-# ===== BATCH PROCESSING =====
+    lang = sys.argv[1] if len(sys.argv) > 1 else 'english'
+    texts = {
+        'english': 'Hello! This is Sentimate. How are you feeling today?',
+        'tamil':   '\u0bb5\u0ba3\u0b95\u0bcd\u0b95\u0bae\u0bcd! \u0b87\u0ba9\u0bcd\u0bb1\u0bc1 \u0b8e\u0baa\u0bcd\u0baa\u0b9f\u0bbf \u0b87\u0bb0\u0bc1\u0b95\u0bcd\u0b95\u0bbf\u0bb1\u0bc0\u0bb0\u0bcd\u0b95\u0bb3\u0bcd?',
+    }
+    test_text = texts.get(lang, texts['english'])
 
-def speak_multiple_sentences(sentences: list, language: Optional[str] = None, pause_between: float = 0.5) -> None:
-    """
-    Speak multiple sentences with pauses between them.
-    
-    Args:
-        sentences: List of text sentences to speak
-        language: Language for all sentences
-        pause_between: Pause duration in seconds between sentences
-    """
-    try:
-        engine = initialize_engine()
-        set_voice_by_language(engine, language)
-        
-        for idx, sentence in enumerate(sentences, 1):
-            if sentence and sentence.strip():
-                print(f"Speaking sentence {idx}/{len(sentences)}")
-                engine.say(sentence)
-                engine.runAndWait()
-        
-        print("All sentences spoken successfully")
-    
-    except Exception as e:
-        raise RuntimeError(f"Failed to speak sentences: {str(e)}")
+    print(f"Generating {lang} TTS for: {test_text}")
+    audio_b64 = speak_text(test_text, lang)
 
-
-# ===== INTEGRATION FUNCTIONS =====
-
-def speak_chatbot_response(response_text: str, detected_language: Optional[str] = None) -> None:
-    """
-    Speak chatbot response text.
-    Designed for direct integration with chatbot module.
-    
-    Args:
-        response_text: The chatbot response to speak
-        detected_language: Language to use for speech (defaults to English)
-    """
-    if not response_text:
-        return
-    
-    # Use detected language if available, otherwise default to English
-    language = detected_language if detected_language in SUPPORTED_LANGUAGES else 'english'
-    
-    try:
-        # Speak at slightly slower rate for important responses
-        speak_text(response_text, language, rate=130)
-    except Exception as e:
-        print(f"Warning: Could not speak response: {str(e)}")
-
-
-# ===== TEST FUNCTION =====
-
-def test_text_to_speech() -> None:
-    """
-    Test the text-to-speech module with sample operations.
-    """
-    print("=== Text-to-Speech Module Test ===\n")
-    
-    # Test 1: Engine initialization
-    print("Test 1: Initializing Speech Engine")
-    try:
-        engine = initialize_engine()
-        print(f"  ✓ Engine initialized successfully")
-        print(f"  ✓ Speech rate: {engine.getProperty('rate')} wpm")
-        print(f"  ✓ Volume: {engine.getProperty('volume')}")
-    except Exception as e:
-        print(f"  ! Error: {str(e)}")
-    print()
-    
-    # Test 2: Check available voices
-    print("Test 2: Available Voices")
-    try:
-        voices = get_available_voices()
-        print(f"  English voices: {len(voices['english'])}")
-        print(f"  Tamil voices: {len(voices['tamil'])}")
-        
-        if voices['english']:
-            print(f"    - {voices['english'][0]['name']}")
-        if voices['tamil']:
-            print(f"    - {voices['tamil'][0]['name']}")
-    except Exception as e:
-        print(f"  ! Error: {str(e)}")
-    print()
-    
-    # Test 3: Language validation
-    print("Test 3: Language Validation")
-    supported = list(SUPPORTED_LANGUAGES.keys())
-    print(f"  Supported languages: {', '.join(supported)}")
-    
-    for lang in ['english', 'tamil', 'spanish']:
-        try:
-            if lang in SUPPORTED_LANGUAGES:
-                print(f"    ✓ {lang.capitalize()}: Supported")
-            else:
-                print(f"    ! {lang.capitalize()}: Not supported")
-        except Exception as e:
-            print(f"    ! Error: {str(e)}")
-    print()
-    
-    # Test 4: Configuration
-    print("Test 4: Speech Configuration")
-    print(f"  Default rate: {SPEECH_CONFIG['rate']} wpm")
-    print(f"  Default volume: {SPEECH_CONFIG['volume']}")
-    print(f"  Default language: {SPEECH_CONFIG['language']}")
-    print()
-    
-    # Test 5: Text-to-Speech capability
-    print("Test 5: Text-to-Speech Capability")
-    print("  Note: Skipping actual speech in automated test")
-    print("  To test speech output, run:")
-    print("    - speak_text('Hello world', 'english')")
-    print("    - speak_text('வணக்கம்', 'tamil')")
-    print()
-    
-    print("✓ Module test completed successfully!")
-    print("\nTo use text-to-speech in your code:")
-    print("  from text_to_speech import speak_text")
-    print("  speak_text('Hello, how are you?', 'english')")
-
-
-if __name__ == "__main__":
-    test_text_to_speech()
+    if audio_b64:
+        out_file = f'test_tts_{lang}.mp3'
+        speak_text_to_file(test_text, lang, out_file)
+        print(f"✓ Saved to {out_file}")
+        print(f"✓ Base64 length: {len(audio_b64)} chars")
+    else:
+        print("✗ TTS generation failed")

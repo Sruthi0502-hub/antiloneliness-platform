@@ -24,7 +24,10 @@ from medication_reminders import add_reminder, get_all_reminders, delete_reminde
 from inactivity_detector import update_activity, check_inactivity, get_activity_status, reset_inactivity
 from voice_chatbot_integration import voice_chat_json_api
 from auth import register_user, authenticate_user
-from database import init_db, save_message, get_chat_history, get_recent_messages
+from database import (
+    init_db, save_message, get_chat_history, get_recent_messages,
+    save_user_preference, get_user_preference,
+)
 from config import DEBUG, HOST, PORT, SECRET_KEY
 
 # ===== FLASK APP SETUP =====
@@ -259,7 +262,16 @@ def get_chatbot_response():
 
         user_id      = session.get('user_id')
         username     = session.get('username', '')
-        display_name = session.get('display_name')  # previously extracted first name
+        display_name = session.get('display_name')
+
+        # Get user's language preference (session cache → DB fallback)
+        lang_pref = session.get('lang_pref')
+        if not lang_pref and user_id:
+            try:
+                lang_pref = get_user_preference(user_id, 'language', 'english')
+                session['lang_pref'] = lang_pref
+            except Exception:
+                lang_pref = 'english'
 
         # Fetch recent history for context window
         recent_history = []
@@ -269,12 +281,13 @@ def get_chatbot_response():
             except Exception:
                 pass
 
-        # Get context-aware bot response
+        # Get context-aware bot response (language preference applied)
         result = get_response(
             user_message,
             username=username,
             history=recent_history,
             display_name=display_name,
+            forced_language=lang_pref,
         )
 
         bot_response   = result['response']
@@ -299,6 +312,45 @@ def get_chatbot_response():
         return jsonify({'response': 'Sorry, I had trouble responding. Please try again.'}), 500
 
 
+# ===== LANGUAGE PREFERENCE ENDPOINTS =====
+
+@app.route('/save_language', methods=['POST'])
+@login_required
+def save_language_route():
+    """
+    Save user's language preference to DB and session.
+    Expects JSON: {"language": "english"|"tamil"}
+    """
+    try:
+        data     = request.get_json()
+        language = (data.get('language', 'english') if data else 'english').lower().strip()
+        if language not in ('english', 'tamil'):
+            return jsonify({'error': 'Invalid language. Use "english" or "tamil".'}), 400
+
+        user_id = session.get('user_id')
+        if user_id:
+            save_user_preference(user_id, 'language', language)
+        session['lang_pref'] = language
+        return jsonify({'success': True, 'language': language}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/get_language', methods=['GET'])
+@login_required
+def get_language_route():
+    """Return the user's saved language preference."""
+    try:
+        lang_pref = session.get('lang_pref')
+        if not lang_pref:
+            user_id   = session.get('user_id')
+            lang_pref = get_user_preference(user_id, 'language', 'english') if user_id else 'english'
+            session['lang_pref'] = lang_pref
+        return jsonify({'language': lang_pref}), 200
+    except Exception as e:
+        return jsonify({'language': 'english'}), 200
+
+
 # ===== CHAT HISTORY API =====
 
 @app.route('/get_history', methods=['GET'])
@@ -311,6 +363,7 @@ def get_history_route():
     try:
         limit = min(int(request.args.get('limit', 50)), 200)
         history = get_chat_history(session['user_id'], limit=limit)
+
         return jsonify({'history': history, 'count': len(history)}), 200
     except Exception as e:
         return jsonify({'error': 'Failed to load history', 'details': str(e)}), 500

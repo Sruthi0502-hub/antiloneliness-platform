@@ -76,8 +76,65 @@ def init_db() -> None:
             )
         """)
 
+        # --- User Preferences table ---
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_preferences (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                pref_key   TEXT    NOT NULL,
+                pref_value TEXT    NOT NULL,
+                updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+                UNIQUE(user_id, pref_key)
+            )
+        """)
+
         conn.commit()
-        print("✓ Database initialized successfully.")
+        print("Database initialized successfully.")
+    finally:
+        conn.close()
+
+
+
+
+# ===== USER PREFERENCE FUNCTIONS =====
+
+def save_user_preference(user_id: int, pref_key: str, pref_value: str) -> None:
+    """
+    Upsert a user preference key/value pair.
+    Example: save_user_preference(1, 'language', 'tamil')
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            INSERT INTO user_preferences (user_id, pref_key, pref_value, updated_at)
+            VALUES (?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id, pref_key) DO UPDATE SET
+                pref_value = excluded.pref_value,
+                updated_at = excluded.updated_at
+            """,
+            (user_id, pref_key, pref_value)
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_user_preference(user_id: int, pref_key: str, default: str = None) -> Optional[str]:
+    """
+    Retrieve a single user preference value.
+    Returns default if not found.
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT pref_value FROM user_preferences WHERE user_id = ? AND pref_key = ?",
+            (user_id, pref_key)
+        )
+        row = cursor.fetchone()
+        return row['pref_value'] if row else default
     finally:
         conn.close()
 

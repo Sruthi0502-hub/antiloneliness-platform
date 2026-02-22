@@ -515,6 +515,46 @@
         let isRecording = false;
         let recognition = null;
 
+        // ===== LANGUAGE PREFERENCE =====
+
+        // Load saved language preference from server on page open
+        async function loadLanguagePreference() {
+            try {
+                const res = await fetch('/get_language');
+                const data = await res.json();
+                if (data.language && langSelect) {
+                    langSelect.value = data.language;
+                }
+            } catch (e) {
+                // Silently ignore — default stays as English
+            }
+        }
+
+        // Save language preference to server when user changes the dropdown
+        async function saveLangPreference(lang) {
+            try {
+                await fetch('/save_language', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ language: lang })
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        // Wire up the dropdown change event
+        langSelect.addEventListener('change', () => {
+            saveLangPreference(langSelect.value);
+        });
+
+        // Load preference as soon as page is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLanguagePreference();
+            scrollToBottom();
+        });
+        // Also try immediately (in case DOMContentLoaded already fired)
+        loadLanguagePreference();
+        scrollToBottom();
+
         // ===== UTILITY =====
         function now() {
             return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
