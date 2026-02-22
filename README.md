@@ -11,21 +11,37 @@ Sentimate is a web-based anti-loneliness platform designed specifically for elde
 - Keyword-based emotional intelligence for personalized conversations
 - Error handling for offline and network issues
 
-### 2. **Medication Reminder Management**
+### 2. **Voice Assistant (Multi-lingual)**
+- Native speech-to-text conversion for voice input
+- Support for **Tamil** and **English** languages
+- Real-time voice recognition with Google Speech API
+- Seamless integration with chatbot for voice conversations
+- Ideal for elderly users with typing difficulties
+- Dynamic microphone adjustment for clear audio capture
+
+### 3. **Text-to-Speech Output**
+- Convert chatbot responses to natural speech
+- Support for **English** and **Tamil** languages
+- Offline speech synthesis using system TTS engine
+- Configurable speech rate for clarity and accessibility
+- Slow speech option ideal for elderly users
+- Seamless integration with voice input for complete voice experience
+
+### 4. **Medication Reminder Management**
 - Create and manage medication reminder schedules
 - Persistent storage with automatic recovery from data corruption
 - Easy-to-use interface for adding/deleting reminders
 - Reminders sorted by time for quick reference
 - Input validation and user-friendly error messages
 
-### 3. **Brain Games for Cognitive Engagement**
+### 5. **Brain Games for Cognitive Engagement**
 - Interactive 10-question quiz with multiple choice answers
 - General knowledge questions to stimulate cognitive function
 - Real-time scoring with encouraging feedback messages
 - Inactivity detection alerts if user becomes inactive
 - Responsive design optimized for accessibility
 
-### 4. **Inactivity Detection & Alerts**
+### 6. **Inactivity Detection & Alerts**
 - Automatic monitoring of user activity
 - 5-minute threshold for inactivity detection
 - Real-time alerts when inactivity is detected
@@ -97,6 +113,67 @@ Navigate to the home page to see all available features:
 4. Review feedback on your performance
 5. Inactivity alerts will appear if you don't interact for 5 minutes
 
+### Voice Assistant
+1. **Enable voice input**: Use the microphone to speak instead of typing
+2. **Supported languages**: Choose between English (en-US) and Tamil (ta-IN)
+3. **Voice to text**: Speak naturally and the system converts speech to text
+4. **Seamless integration**: Voice input works with the chatbot for real conversations
+5. **Accessibility**: Perfect for users who prefer speaking or have difficulty typing
+
+#### Voice Assistant Quick Guide
+```python
+from voice_assistant import listen_voice
+from chatbot import get_response
+
+# Capture English voice input
+user_text = listen_voice('english')
+
+# Get chatbot response
+bot_response = get_response(user_text)
+print(bot_response)
+```
+
+**Supported Languages:**
+- English (en-US)
+- Tamil (ta-IN)
+
+**Requirements for Voice:**
+- Microphone connected to computer
+- Python packages: SpeechRecognition, pyaudio
+- Internet connection (uses Google Speech API)
+- Clear audio without excessive background noise
+
+### Text-to-Speech Output
+1. **Hear responses**: Chatbot responses are automatically spoken
+2. **Supported languages**: English and Tamil speech output
+3. **Configurable speed**: Control speech rate for comfort and understanding
+4. **Offline operation**: Uses local system text-to-speech engine
+5. **Accessibility**: Perfect for users with vision difficulties or preference for spoken content
+
+#### Text-to-Speech Quick Guide
+```python
+from text_to_speech import speak_text, speak_text_slow
+from chatbot import get_response
+
+# Get chatbot response
+response = get_response(user_input)
+
+# Speak the response
+speak_text(response, 'english')  # Normal speed
+
+# Or speak slowly for important messages
+speak_text_slow(response, 'english')  # Slower, clearer speech
+```
+
+**Supported Languages:**
+- English (en-US)
+- Tamil (ta-IN)
+
+**Speech Rate Options:**
+- Normal: 150 words per minute (default)
+- Slow: 100 words per minute (elderly-friendly)
+- Fast: 200+ words per minute (custom)
+
 ## 📁 Project Structure
 
 ```
@@ -104,6 +181,10 @@ antiloneliness-platform/
 ├── app.py                          # Flask application with all routes and endpoints
 ├── config.py                       # Centralized configuration settings
 ├── chatbot.py                      # Emotional support chatbot module
+├── voice_assistant.py              # Voice input (Tamil & English) to text conversion
+├── voice_assistant_examples.py     # Voice assistant usage examples
+├── text_to_speech.py               # Text-to-speech conversion (Tamil & English)
+├── text_to_speech_examples.py      # Text-to-speech usage examples
 ├── medication_reminders.py         # Medication reminder management system
 ├── inactivity_detector.py         # User activity monitoring and inactivity detection
 ├── requirements.txt               # Python dependencies
@@ -227,6 +308,48 @@ python -c "from medication_reminders import test_reminder_system; test_reminder_
 
 # Test inactivity detection
 python -c "from inactivity_detector import test_inactivity_system; test_inactivity_system()"
+
+# Test voice assistant (speech-to-text)
+python -c "from voice_assistant import test_voice_assistant; test_voice_assistant()"
+
+# Test text-to-speech
+python -c "from text_to_speech import test_text_to_speech; test_text_to_speech()"
+```
+
+### Voice Assistant Testing
+To test voice input in your application:
+
+```python
+from voice_assistant import listen_voice, listen_voice_with_language_selection
+
+# Test English voice input
+english_text = listen_voice('english')
+
+# Test Tamil voice input
+tamil_text = listen_voice('tamil')
+
+# Test with language selection
+text, language = listen_voice_with_language_selection()
+```
+
+### Text-to-Speech Testing
+To test voice output in your application:
+
+```python
+from text_to_speech import speak_text, speak_text_slow, speak_multiple_sentences
+
+# Test English speech
+speak_text('Hello, how are you?', 'english')
+
+# Test Tamil speech
+speak_text('வணக்கம்', 'tamil')
+
+# Test slow speech (ideal for important messages)
+speak_text_slow('Please take your medicine now', 'english')
+
+# Test multiple sentences
+sentences = ['First sentence', 'Second sentence']
+speak_multiple_sentences(sentences, 'english')
 ```
 
 All test suites validate:
@@ -235,6 +358,7 @@ All test suites validate:
 - Data persistence
 - Response accuracy
 - Edge cases
+- Language support (English & Tamil)
 
 ## 🐛 Troubleshooting
 
@@ -257,6 +381,25 @@ All test suites validate:
 - Ensure JavaScript is enabled in browser
 - Check that activity updates are being sent (browser Network tab)
 - Verify config.py settings for threshold and intervals
+
+### Voice Assistant Not Working
+- **Microphone not detected**: Ensure microphone is connected and working
+- **PyAudio installation fails**: This is a native extension; may require compilation tools
+  - Windows: Install Visual C++ Build Tools
+  - macOS: Install Xcode Command Line Tools
+  - Linux: Install `python3-dev` and `portaudio19-dev`
+- **No speech detected**: Speak clearly within the timeout period (default 10 seconds)
+- **Speech not understood**: Reduce background noise and speak more clearly
+- **Module import fails**: Verify SpeechRecognition is installed: `pip install SpeechRecognition==3.10.0`
+- **API errors**: Check internet connection (uses Google Speech Recognition API)
+
+### Text-to-Speech Not Working
+- **No sound output**: Check system volume and speaker settings
+- **Speech engine not found**: Ensure pyttsx3 is installed: `pip install pyttsx3==2.90`
+- **Language not supported**: Currently only English and Tamil are supported
+- **ModuleNotFoundError**: Run `pip install -r requirements.txt` to install all dependencies
+- **No voices available**: Check system text-to-speech settings and install voices if needed
+- **Sound issues on Linux**: Install `pulseaudio` or `alsa`: `sudo apt-get install pulseaudio`
 
 ## 🚀 Deployment
 
