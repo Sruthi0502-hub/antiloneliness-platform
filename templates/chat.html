@@ -607,10 +607,12 @@
                 removeTypingIndicator(typingId);
 
                 const botText = data.response || 'I appreciate that thought! Tell me more.';
+                // Use the language detected server-side (Tamil or English)
+                const detectedLang = data.language || langSelect.value;
                 addMessage(botText, 'bot');
 
                 if (voiceResponseEnabled) {
-                    speakResponse(botText);
+                    speakResponse(botText, detectedLang);
                 }
             } catch (err) {
                 removeTypingIndicator(typingId);
@@ -643,13 +645,14 @@
         }
 
         // ===== TTS — gTTS via /speak_response =====
-        async function speakResponse(text) {
-            const language = langSelect.value;
+        async function speakResponse(text, language) {
+            // Use server-detected language; fall back to the dropdown selection
+            const lang = language || langSelect.value;
             try {
                 const res = await fetch('/speak_response', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, language })
+                    body: JSON.stringify({ text, language: lang })
                 });
                 const data = await res.json();
                 if (data.success && data.audio_b64) {

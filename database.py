@@ -307,6 +307,37 @@ def get_chat_history(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
         conn.close()
 
 
+def get_recent_messages(user_id: int, limit: int = 10) -> list:
+    """
+    Return the last `limit` chat messages as lightweight {sender, message} dicts.
+    Used to feed conversation context to the chatbot.
+
+    Args:
+        user_id: The user's ID
+        limit:   How many messages to return (chronological order, oldest first)
+
+    Returns:
+        List of {'sender': str, 'message': str} dicts
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT sender, message
+            FROM chat_history
+            WHERE user_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (user_id, limit)
+        )
+        rows = cursor.fetchall()
+        return [{'sender': r['sender'], 'message': r['message']} for r in reversed(rows)]
+    finally:
+        conn.close()
+
+
 def clear_chat_history(user_id: int) -> int:
     """
     Delete all chat history for a user.

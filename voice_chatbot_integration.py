@@ -69,7 +69,8 @@ def voice_chat(language: Optional[str] = None, speak_response: bool = True, slow
         
         # Step 2: Process with chatbot
         print("Step 2: Generating response...")
-        chatbot_response = get_response(user_input)
+        result = get_response(user_input)
+        chatbot_response = result['response'] if isinstance(result, dict) else result
         print(f"✓ Response: {chatbot_response}\n")
         
         # Step 3: Speak the response

@@ -24,7 +24,7 @@ from medication_reminders import add_reminder, get_all_reminders, delete_reminde
 from inactivity_detector import update_activity, check_inactivity, get_activity_status, reset_inactivity
 from voice_chatbot_integration import voice_chat_json_api
 from auth import register_user, authenticate_user
-from database import init_db, save_message, get_chat_history
+from database import init_db, save_message, get_chat_history, get_recent_messages
 from config import DEBUG, HOST, PORT, SECRET_KEY
 
 # ===== FLASK APP SETUP =====
@@ -243,9 +243,10 @@ def delete_reminder_route(reminder_id):
 @login_required
 def get_chatbot_response():
     """
-    Get chatbot response from user message and persist both messages.
+    Get context-aware chatbot response and persist both messages to DB.
 
     Expects JSON: {"message": "..."}
+    Returns JSON: {"response": str, "language": str}
     """
     try:
         data = request.get_json()
@@ -256,22 +257,63 @@ def get_chatbot_response():
         if not user_message:
             return jsonify({'response': 'Please type a message!'}), 400
 
-        # Get bot response
-        bot_response = get_response(user_message)
+        user_id      = session.get('user_id')
+        username     = session.get('username', '')
+        display_name = session.get('display_name')  # previously extracted first name
 
-        # Persist to chat history
-        user_id = session.get('user_id')
+        # Fetch recent history for context window
+        recent_history = []
+        if user_id:
+            try:
+                recent_history = get_recent_messages(user_id, limit=10)
+            except Exception:
+                pass
+
+        # Get context-aware bot response
+        result = get_response(
+            user_message,
+            username=username,
+            history=recent_history,
+            display_name=display_name,
+        )
+
+        bot_response   = result['response']
+        detected_name  = result.get('detected_name')
+        language       = result.get('language', 'english')
+
+        # Store detected name in session for future turns
+        if detected_name:
+            session['display_name'] = detected_name
+
+        # Persist both messages to DB
         if user_id:
             try:
                 save_message(user_id, 'user', user_message)
                 save_message(user_id, 'bot', bot_response)
             except Exception:
-                pass  # Don't fail the response if history save fails
+                pass
 
-        return jsonify({'response': bot_response}), 200
+        return jsonify({'response': bot_response, 'language': language}), 200
 
     except Exception as e:
         return jsonify({'response': 'Sorry, I had trouble responding. Please try again.'}), 500
+
+
+# ===== CHAT HISTORY API =====
+
+@app.route('/get_history', methods=['GET'])
+@login_required
+def get_history_route():
+    """
+    Return the logged-in user's chat history as JSON.
+    Optional query param: ?limit=N (default 50)
+    """
+    try:
+        limit = min(int(request.args.get('limit', 50)), 200)
+        history = get_chat_history(session['user_id'], limit=limit)
+        return jsonify({'history': history, 'count': len(history)}), 200
+    except Exception as e:
+        return jsonify({'error': 'Failed to load history', 'details': str(e)}), 500
 
 
 # ===== VOICE CHATBOT ENDPOINTS =====
