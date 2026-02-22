@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -102,6 +103,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -287,6 +289,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -297,6 +300,10 @@
                 <a href="/chat" class="nav-link">Chat</a>
                 <a href="/medication" class="nav-link">Reminders</a>
                 <a href="/games" class="nav-link">Games</a>
+                {% if session.username %}
+                <span class="nav-link" style="color:#6b8e6f; font-weight:600;">👤 {{ session.username }}</span>
+                <a href="/logout" class="nav-link" style="color:#c62828; font-weight:600;">Logout</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -330,7 +337,8 @@
                     <div id="feedbackMessage" class="completion-message"></div>
                     <div class="btn-group-completion">
                         <button class="btn-restart" onclick="restartQuiz()">Play Again</button>
-                        <button class="btn-restart" style="background-color: #6b8e6f; color: white;" onclick="goHome()">Back to Home</button>
+                        <button class="btn-restart" style="background-color: #6b8e6f; color: white;"
+                            onclick="goHome()">Back to Home</button>
                     </div>
                 </div>
             </div>
@@ -407,10 +415,10 @@
 
         function displayQuestion() {
             const question = quizQuestions[currentQuestion];
-            
+
             questionText.textContent = question.question;
             questionCounter.textContent = `Question ${currentQuestion + 1} of ${quizQuestions.length}`;
-            
+
             optionsContainer.innerHTML = question.options
                 .map((option, index) => `
                     <button class="option-btn" onclick="selectOption(${index})">
@@ -418,7 +426,7 @@
                     </button>
                 `)
                 .join('');
-            
+
             selectedAnswer = null;
             nextBtn.disabled = true;
         }
@@ -426,7 +434,7 @@
         function selectOption(index) {
             const buttons = document.querySelectorAll('.option-btn');
             buttons.forEach(btn => btn.classList.remove('selected'));
-            
+
             buttons[index].classList.add('selected');
             selectedAnswer = index;
             nextBtn.disabled = false;
@@ -434,14 +442,14 @@
 
         function nextQuestion() {
             const question = quizQuestions[currentQuestion];
-            
+
             if (selectedAnswer === question.correct) {
                 score++;
                 currentScoreDisplay.textContent = score;
             }
-            
+
             currentQuestion++;
-            
+
             if (currentQuestion < quizQuestions.length) {
                 displayQuestion();
             } else {
@@ -452,9 +460,9 @@
         function showCompletion() {
             questionSection.classList.remove('active');
             completionSection.classList.add('active');
-            
+
             finalScore.textContent = `${score}/10`;
-            
+
             let message = '';
             if (score === 10) {
                 message = 'Perfect score! You are amazing!';
@@ -467,7 +475,7 @@
             } else {
                 message = 'Nice try! Better luck next time!';
             }
-            
+
             feedbackMessage.textContent = message;
         }
 
@@ -476,10 +484,10 @@
             score = 0;
             selectedAnswer = null;
             currentScoreDisplay.textContent = '0';
-            
+
             questionSection.classList.add('active');
             completionSection.classList.remove('active');
-            
+
             displayQuestion();
         }
 
@@ -493,12 +501,12 @@
         function initializeInactivityDetection() {
             // Update activity on page load
             updateUserActivity();
-            
+
             // Update activity on user interactions
             document.addEventListener('click', updateUserActivity);
             document.addEventListener('keypress', updateUserActivity);
             document.addEventListener('mousemove', updateUserActivity);
-            
+
             // Check inactivity every minute
             setInterval(checkUserInactivity, 60000);
         }
@@ -511,7 +519,7 @@
                 },
                 body: JSON.stringify({ user_id: 'web_user' }),
             })
-            .catch(error => console.error('Error updating activity:', error));
+                .catch(error => console.error('Error updating activity:', error));
         }
 
         function checkUserInactivity() {
@@ -545,7 +553,7 @@
                 text-align: center;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             `;
-            
+
             alertContainer.innerHTML = `
                 <h2 style="color: #c8d4b8; margin-bottom: 15px; font-size: 1.5em;">Just Checking In</h2>
                 <p style="color: #333; font-size: 1.1em; margin-bottom: 25px; line-height: 1.6;">
@@ -565,7 +573,7 @@
                     I'm Still Here
                 </button>
             `;
-            
+
             // Add overlay
             const overlay = document.createElement('div');
             overlay.style.cssText = `
@@ -582,7 +590,7 @@
                 alertContainer.remove();
                 updateUserActivity();
             };
-            
+
             document.body.appendChild(overlay);
             document.body.appendChild(alertContainer);
         }
@@ -592,4 +600,5 @@
         initializeInactivityDetection();
     </script>
 </body>
+
 </html>

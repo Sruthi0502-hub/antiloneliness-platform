@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Sentimate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f5f3f0 50%, #e8f0fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 52px 48px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .logo-icon { font-size: 3em; line-height: 1; }
+
+        .logo h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #6b8e6f;
+            margin-top: 8px;
+        }
+
+        .tagline {
+            text-align: center;
+            color: #888;
+            font-size: 0.95em;
+            margin-bottom: 36px;
+        }
+
+        h2 {
+            font-size: 1.4em;
+            color: #222;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .flash {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        .flash.success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #4caf50; }
+        .flash.error   { background: #fce8e6; color: #c62828; border-left: 4px solid #e53935; }
+        .flash.info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #1e88e5; }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 7px;
+        }
+
+        .hint {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 13px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            color: #222;
+            background: #fafafa;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            -webkit-appearance: none;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #6b8e6f;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(107,142,111,0.12);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #6b8e6f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            background: #5a7660;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(107,142,111,0.3);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .divider {
+            text-align: center;
+            color: #bbb;
+            margin: 24px 0;
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #e8e8e8;
+        }
+        .divider::before { left: 0; }
+        .divider::after  { right: 0; }
+
+        .link-row {
+            text-align: center;
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .link-row a {
+            color: #6b8e6f;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .link-row a:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .card { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <div class="logo-icon">🌿</div>
+            <h1>Sentimate</h1>
+        </div>
+        <p class="tagline">Join us — you're never alone here</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        <h2>Create your account</h2>
+
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    autocomplete="username"
+                    required
+                    autofocus
+                    minlength="3"
+                    maxlength="30"
+                >
+                <p class="hint">3–30 characters, letters, numbers, hyphens or underscores</p>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    required
+                    minlength="6"
+                >
+                <p class="hint">At least 6 characters</p>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Repeat your password"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <div class="link-row">
+            Already have an account? <a href="/login">Log in</a>
+        </div>
+    </div>
+
+    <script>
+        // Client-side confirm password check
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const pw  = document.getElementById('password').value;
+            const cpw = document.getElementById('confirm_password').value;
+            if (pw !== cpw) {
+                e.preventDefault();
+                alert('Passwords do not match. Please try again.');
+                document.getElementById('confirm_password').focus();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -164,6 +165,7 @@
                 opacity: 0;
                 transform: translateX(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -250,6 +252,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
@@ -260,6 +263,10 @@
                 <a href="/chat" class="nav-link">Chat</a>
                 <a href="/medication" class="nav-link">Reminders</a>
                 <a href="/games" class="nav-link">Games</a>
+                {% if session.username %}
+                <span class="nav-link" style="color:#6b8e6f; font-weight:600;">👤 {{ session.username }}</span>
+                <a href="/logout" class="nav-link" style="color:#c62828; font-weight:600;">Logout</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -273,22 +280,15 @@
     <div class="container">
         <div class="form-section">
             <h2>Add New Reminder</h2>
-            
+
             <div class="form-group">
                 <label for="medicineName">Medicine Name:</label>
-                <input 
-                    type="text" 
-                    id="medicineName" 
-                    placeholder="e.g., Aspirin, Vitamin D"
-                >
+                <input type="text" id="medicineName" placeholder="e.g., Aspirin, Vitamin D">
             </div>
 
             <div class="form-group">
                 <label for="medicineTime">Time:</label>
-                <input 
-                    type="time" 
-                    id="medicineTime"
-                >
+                <input type="time" id="medicineTime">
             </div>
 
             <div class="btn-group">
@@ -428,10 +428,10 @@
                     medicineNameInput.value = '';
                     medicineTimeInput.value = '';
                     medicineNameInput.focus();
-                    
+
                     // Show success message
                     showMessage(`Added reminder for ${name} at ${time}`, 'success');
-                    
+
                     // Reload reminders from server
                     await loadReminders();
                 } else {
@@ -480,13 +480,13 @@
         }
 
         // Allow Enter key to add reminder
-        medicineTimeInput.addEventListener('keypress', function(e) {
+        medicineTimeInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addReminder();
             }
         });
 
-        medicineNameInput.addEventListener('keypress', function(e) {
+        medicineNameInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addReminder();
             }
@@ -505,12 +505,12 @@
         function initializeInactivityDetection() {
             // Update activity on page load
             updateUserActivity();
-            
+
             // Update activity on user interactions
             document.addEventListener('click', updateUserActivity);
             document.addEventListener('keypress', updateUserActivity);
             document.addEventListener('mousemove', updateUserActivity);
-            
+
             // Check inactivity every minute
             setInterval(checkUserInactivity, 60000);
         }
@@ -523,7 +523,7 @@
                 },
                 body: JSON.stringify({ user_id: 'web_user' }),
             })
-            .catch(error => console.error('Error updating activity:', error));
+                .catch(error => console.error('Error updating activity:', error));
         }
 
         function checkUserInactivity() {
@@ -557,7 +557,7 @@
                 text-align: center;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             `;
-            
+
             alertContainer.innerHTML = `
                 <h2 style="color: #d4a574; margin-bottom: 15px; font-size: 1.5em;">Just Checking In</h2>
                 <p style="color: #333; font-size: 1.1em; margin-bottom: 25px; line-height: 1.6;">
@@ -577,7 +577,7 @@
                     I'm Still Here
                 </button>
             `;
-            
+
             // Add overlay
             const overlay = document.createElement('div');
             overlay.style.cssText = `
@@ -594,10 +594,11 @@
                 alertContainer.remove();
                 updateUserActivity();
             };
-            
+
             document.body.appendChild(overlay);
             document.body.appendChild(alertContainer);
         }
     </script>
 </body>
+
 </html>

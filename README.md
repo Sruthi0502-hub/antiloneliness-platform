@@ -174,6 +174,58 @@ speak_text_slow(response, 'english')  # Slower, clearer speech
 - Slow: 100 words per minute (elderly-friendly)
 - Fast: 200+ words per minute (custom)
 
+### Voice Chatbot Integration (Complete Voice Experience)
+The Voice Chatbot Integration combines voice input, chatbot processing, and voice output into one seamless experience. Users can have natural, hands-free conversations entirely through voice.
+
+**Complete Voice Conversation Pipeline:**
+```
+User speaks → listen_voice() → "Hello, how are you?"
+                                        ↓
+                               get_response() → chatbot
+                                        ↓
+                               "I'm doing well, thank you!"
+                                        ↓
+                               speak_text() → Speaker hears response
+```
+
+#### Voice Chatbot Quick Guide
+```python
+from voice_chatbot_integration import voice_chat
+
+# Complete hands-free conversation in one call
+result = voice_chat('english')
+
+# User speaks → text captured → chatbot responds → response spoken
+if result['success']:
+    print(f"User said: {result['user_input']}")
+    print(f"Bot said: {result['chatbot_response']}")  # Already spoken aloud
+```
+
+**Supported Languages:**
+- English (en-US)
+- Tamil (ta-IN)
+
+**Available Functions:**
+- `voice_chat()` - Single conversation turn
+- `voice_chat_for_elderly()` - Slow speech (100 wpm) optimized for clarity
+- `voice_chat_quiet_mode()` - Capture voice without audio output
+- `continuous_voice_chat()` - Multiple conversation turns
+- `voice_chat_with_language_selection()` - Let user choose language
+
+**Web API Endpoints:**
+- `POST /voice_chat` - Full voice conversation (returns result)
+- `POST /voice_chat_text_only` - Voice input, text-only response
+- `GET /voice_chat_health` - Check voice system health and supported languages
+
+**Perfect For:**
+- Elderly users who prefer speaking to typing
+- Users with visual or motor impairments
+- Hands-free interaction while cooking/exercising
+- Multilingual families with different language preferences
+- Building accessible voice-first interfaces
+
+See `VOICE_CHATBOT_INTEGRATION.md` for complete documentation.
+
 ## 📁 Project Structure
 
 ```
@@ -183,6 +235,8 @@ antiloneliness-platform/
 ├── chatbot.py                      # Emotional support chatbot module
 ├── voice_assistant.py              # Voice input (Tamil & English) to text conversion
 ├── voice_assistant_examples.py     # Voice assistant usage examples
+├── voice_chatbot_integration.py    # Complete voice conversation integration (NEW)
+├── voice_chatbot_examples.py       # Voice chatbot integration examples (NEW)
 ├── text_to_speech.py               # Text-to-speech conversion (Tamil & English)
 ├── text_to_speech_examples.py      # Text-to-speech usage examples
 ├── medication_reminders.py         # Medication reminder management system
@@ -190,6 +244,7 @@ antiloneliness-platform/
 ├── requirements.txt               # Python dependencies
 ├── README.md                      # This file
 ├── .gitignore                     # Git version control ignore patterns
+├── VOICE_CHATBOT_INTEGRATION.md   # Complete voice integration documentation (NEW)
 ├── templates/                     # HTML templates
 │   ├── home.html                 # Landing page with feature navigation
 │   ├── chat.html                 # Chat companion interface
@@ -238,6 +293,17 @@ The application includes predefined colors optimized for elderly users:
 - Background: Off-White (#F5F5F5)
 
 ## 🔌 API Endpoints
+
+### Voice Chatbot (Complete Voice Conversation)
+- `POST /voice_chat` - Full voice conversation (listen → process → speak)
+- `POST /voice_chat_text_only` - Voice input with text-only response  
+- `GET /voice_chat_health` - Check voice system health and module availability
+
+### Voice Assistant (Speech-to-Text Only)
+- `POST /capture_voice` - Capture voice and convert to text (via voice_assistant module)
+
+### Text-to-Speech (Speech Output Only)
+- Routes handled via `text_to_speech` module (speak_text function)
 
 ### Activity Tracking
 - `POST /update_activity` - Update user activity timestamp
@@ -314,9 +380,12 @@ python -c "from voice_assistant import test_voice_assistant; test_voice_assistan
 
 # Test text-to-speech
 python -c "from text_to_speech import test_text_to_speech; test_text_to_speech()"
+
+# Test voice chatbot integration (speech-to-text + chatbot + speech output)
+python -c "from voice_chatbot_integration import test_voice_chatbot_integration; test_voice_chatbot_integration()"
 ```
 
-### Voice Assistant Testing
+### Voice Chatbot Integration Testing
 To test voice input in your application:
 
 ```python

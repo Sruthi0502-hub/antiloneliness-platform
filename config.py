@@ -13,6 +13,13 @@ DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
 HOST = os.environ.get('FLASK_HOST', '127.0.0.1')
 PORT = int(os.environ.get('FLASK_PORT', 5000))
 
+# Flask secret key — used for session signing
+# Override via environment variable in production!
+SECRET_KEY = os.environ.get('SECRET_KEY', 'sentimate-dev-secret-key-change-in-production')
+
+# SQLite database path
+DB_PATH = os.environ.get('DB_PATH', str(Path('data') / 'sentimate.db'))
+
 # ===== DATA STORAGE SETTINGS =====
 
 # Base data directory

@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Companion - Sentimate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/elderly-friendly.css">
     <style>
-        * {
+        *,
+        *::before,
+        *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f3f0;
             min-height: 100vh;
             display: flex;
@@ -22,55 +27,107 @@
         }
 
         header {
-            background-color: #6b8e6f;
+            background: linear-gradient(135deg, #6b8e6f 0%, #5a7a5e 100%);
             color: white;
-            padding: 20px;
+            padding: 18px 24px;
             text-align: center;
             border-radius: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 16px rgba(107, 142, 111, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         header h1 {
-            font-size: 2.5em;
-            margin: 0;
-            font-weight: 600;
+            font-size: 2em;
+            font-weight: 700;
         }
 
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Language selector */
+        .lang-select {
+            padding: 7px 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .lang-select option {
+            background: #5a7660;
+            color: white;
+        }
+
+        /* Voice toggle button */
+        .voice-toggle {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .voice-toggle.active {
+            background: rgba(255, 255, 255, 0.30);
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .voice-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Chat container */
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 200px);
+            height: calc(100vh - 210px);
             max-width: 900px;
             width: 100%;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
             overflow: hidden;
         }
 
         .chat-box {
             flex: 1;
             overflow-y: auto;
-            padding: 25px;
-            background-color: #fffbf8;
+            padding: 24px;
+            background: #fffbf8;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 14px;
         }
 
         .message {
             display: flex;
-            margin-bottom: 15px;
-            animation: slideIn 0.3s ease;
+            animation: slideIn 0.28s ease;
         }
 
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -87,32 +144,45 @@
 
         .message-content {
             max-width: 70%;
-            padding: 15px 20px;
-            border-radius: 15px;
-            font-size: 1.1em;
-            line-height: 1.5;
+            padding: 13px 18px;
+            border-radius: 18px;
+            font-size: 1.05em;
+            line-height: 1.55;
             word-wrap: break-word;
         }
 
         .message.user .message-content {
-            background-color: #b8d4c3;
+            background: linear-gradient(135deg, #b8d4c3, #a8c8b4);
             color: #1a1a1a;
             border-bottom-right-radius: 5px;
         }
 
         .message.bot .message-content {
-            background-color: #e8e8e8;
+            background: #f0f0f0;
             color: #1a1a1a;
             border-bottom-left-radius: 5px;
         }
 
+        .message-meta {
+            font-size: 0.72em;
+            color: #bbb;
+            margin-top: 4px;
+            padding: 0 4px;
+            text-align: right;
+        }
+
+        .message.bot .message-meta {
+            text-align: left;
+        }
+
+        /* Input area */
         .input-area {
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-top: 2px solid #e0e0e0;
+            padding: 16px 20px;
+            background: #f9f9f9;
+            border-top: 2px solid #efefef;
             display: flex;
-            gap: 15px;
-            align-items: flex-end;
+            gap: 12px;
+            align-items: center;
         }
 
         .input-wrapper {
@@ -121,37 +191,39 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 15px 20px;
-            font-size: 1.1em;
+            padding: 13px 18px;
+            font-size: 1.05em;
             border: 2px solid #ddd;
             border-radius: 10px;
-            background-color: white;
-            transition: border-color 0.3s;
+            font-family: inherit;
+            background: white;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
 
         input[type="text"]:focus {
             outline: none;
             border-color: #6b8e6f;
-            box-shadow: 0 0 0 3px rgba(107, 142, 111, 0.1);
+            box-shadow: 0 0 0 3px rgba(107, 142, 111, 0.12);
         }
 
         .send-btn {
-            padding: 15px 40px;
-            font-size: 1.1em;
-            background-color: #6b8e6f;
+            padding: 13px 32px;
+            font-size: 1.05em;
+            background: #6b8e6f;
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
-            min-width: 120px;
-            height: 55px;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            height: 50px;
+            min-width: 100px;
         }
 
         .send-btn:hover {
-            background-color: #5a7660;
-            transform: translateY(-2px);
+            background: #5a7660;
+            transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(107, 142, 111, 0.3);
         }
 
@@ -160,80 +232,206 @@
         }
 
         .send-btn:disabled {
-            background-color: #ccc;
+            background: #ccc;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
 
-        .back-btn {
-            background-color: #d4c8b8;
-            color: #2a2a2a;
-            padding: 12px 25px;
+        /* ====== MIC BUTTON ====== */
+        .mic-btn {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             border: none;
-            border-radius: 10px;
-            font-size: 1em;
+            background: #6b8e6f;
+            color: white;
+            font-size: 1.3em;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            align-self: flex-start;
-            margin: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.15s;
+            outline: none;
         }
 
-        .back-btn:hover {
-            background-color: #c4b8a8;
-            transform: translateY(-2px);
+        .mic-btn:hover {
+            background: #5a7660;
+            transform: scale(1.05);
         }
 
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
+        .mic-btn:active {
+            transform: scale(0.97);
+        }
+
+        /* Recording pulse animation */
+        .mic-btn.recording {
+            background: #e53935;
+            animation: micPulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes micPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.5);
             }
 
-            .chat-box {
-                padding: 15px;
-            }
-
-            .message-content {
-                max-width: 85%;
-                font-size: 1em;
-                padding: 12px 15px;
-            }
-
-            .input-area {
-                flex-direction: column;
-                gap: 10px;
-                padding: 15px;
-            }
-
-            .input-wrapper {
-                width: 100%;
-            }
-
-            .send-btn {
-                width: 100%;
-                min-width: unset;
-            }
-
-            .back-btn {
-                margin: 10px;
-                padding: 10px 20px;
-                font-size: 0.9em;
+            50% {
+                box-shadow: 0 0 0 12px rgba(229, 57, 53, 0);
             }
         }
 
+        .mic-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        /* Voice status bar */
+        .voice-status-bar {
+            padding: 8px 20px;
+            background: #fff8e1;
+            border-top: 1px solid #ffe082;
+            text-align: center;
+            font-size: 0.9em;
+            color: #795548;
+            font-weight: 500;
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .voice-status-bar.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Empty state */
         .empty-state {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
-            font-size: 1.3em;
-            color: #999;
+            font-size: 1.2em;
+            color: #bbb;
             text-align: center;
+            flex-direction: column;
+            gap: 10px;
             padding: 20px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 3em;
+        }
+
+        /* Back button */
+        .back-btn {
+            background: #d4c8b8;
+            color: #2a2a2a;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background 0.2s, transform 0.15s;
+            align-self: flex-start;
+            margin: 0 0 10px 0;
+        }
+
+        .back-btn:hover {
+            background: #c4b8a8;
+            transform: translateY(-1px);
+        }
+
+        /* Typing indicator */
+        .typing-indicator .message-content {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 14px 18px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #aaa;
+            border-radius: 50%;
+            animation: dotBounce 1.3s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.30s;
+        }
+
+        @keyframes dotBounce {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-6px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .header-controls {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .chat-box {
+                padding: 14px;
+            }
+
+            .message-content {
+                max-width: 88%;
+                font-size: 1em;
+            }
+
+            .input-area {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .input-wrapper {
+                width: 100%;
+                flex: none;
+            }
+
+            .send-btn {
+                flex: 1;
+            }
         }
     </style>
 </head>
-<body>    <!-- Navigation Bar -->
+
+<body>
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand">Sentimate</div>
@@ -242,162 +440,340 @@
                 <a href="/chat" class="nav-link">Chat</a>
                 <a href="/medication" class="nav-link">Reminders</a>
                 <a href="/games" class="nav-link">Games</a>
+                {% if session.username %}
+                <span class="nav-link" style="color:#6b8e6f; font-weight:600;">👤 {{ session.username }}</span>
+                <a href="/logout" class="nav-link" style="color:#c62828; font-weight:600;">Logout</a>
+                {% endif %}
             </div>
         </div>
     </nav>
-    <button class="back-btn" onclick="goHome()">← Back</button>
-    
+
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+
     <header>
-        <h1>Chat Companion</h1>
+        <h1>💬 Chat Companion</h1>
+        <div class="header-controls">
+            <select class="lang-select" id="langSelect" title="Speech language">
+                <option value="english">🇬🇧 English</option>
+                <option value="tamil">🇮🇳 Tamil</option>
+            </select>
+            <button class="voice-toggle active" id="voiceToggle" onclick="toggleVoiceResponse()"
+                title="Toggle voice responses">
+                🔊 Voice On
+            </button>
+        </div>
     </header>
 
     <div class="chat-container">
         <div class="chat-box" id="chatBox">
-            <div class="empty-state">
-                Start a conversation with me anytime. I'm here to listen!
+            {% if history %}
+            {% for msg in history %}
+            <div class="message {{ msg.sender }}" style="animation:none;">
+                <div>
+                    <div class="message-content">{{ msg.message }}</div>
+                    <div class="message-meta">{{ msg.timestamp[11:16] }}</div>
+                </div>
             </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">🌿</div>
+                <div>Start a conversation with me anytime.<br>I'm here to listen!</div>
+            </div>
+            {% endif %}
         </div>
 
+        <!-- Voice status bar -->
+        <div class="voice-status-bar" id="voiceStatusBar"></div>
+
         <div class="input-area">
+            <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Hold to speak">🎤</button>
             <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="userInput" 
-                    placeholder="Type your message here..." 
-                    autocomplete="off"
-                >
+                <input type="text" id="userInput" placeholder="Type your message, or click 🎤 to speak..."
+                    autocomplete="off">
             </div>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
+    <!-- Hidden audio element for TTS playback -->
+    <audio id="ttsAudio" style="display:none;"></audio>
+
     <script>
+        // ===== ELEMENTS =====
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+        const voiceToggle = document.getElementById('voiceToggle');
+        const langSelect = document.getElementById('langSelect');
+        const statusBar = document.getElementById('voiceStatusBar');
+        const ttsAudio = document.getElementById('ttsAudio');
 
-        function sendMessage() {
-            const message = userInput.value.trim();
-            
-            // Validate input
-            if (message === '') {
-                // Show user-friendly message for empty input
-                userInput.focus();
-                userInput.placeholder = 'Please type something to chat!';
-                return;
-            }
+        // ===== STATE =====
+        let voiceResponseEnabled = true;
+        let isRecording = false;
+        let recognition = null;
 
-            // Display user message
-            addMessage(message, 'user');
-            userInput.value = '';
-            userInput.placeholder = '';
-            userInput.focus();
-
-            // Disable send button while waiting
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Loading...';
-
-            // Get bot response from /get_response endpoint
-            fetch('/get_response', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: message }),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Check if response contains the expected data
-                if (data.response) {
-                    addMessage(data.response, 'bot');
-                } else {
-                    addMessage('I appreciate that thought! Tell me more.', 'bot');
-                }
-            })
-            .catch(error => {
-                // User-friendly error message
-                console.error('Error:', error);
-                addMessage('I\'m having a little trouble at the moment. Please try again!', 'bot');
-            })
-            .finally(() => {
-                sendBtn.disabled = false;
-                sendBtn.textContent = 'Send';
-            });
+        // ===== UTILITY =====
+        function now() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender}`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = text;
-            
-            messageDiv.appendChild(contentDiv);
-            chatBox.appendChild(messageDiv);
+        function showStatus(msg) {
+            statusBar.textContent = msg;
+            statusBar.classList.add('visible');
+        }
 
-            // Clear empty state
-            const emptyState = chatBox.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
+        function hideStatus() {
+            statusBar.classList.remove('visible');
+        }
 
-            // Scroll to bottom
+        function removeEmptyState() {
+            const es = document.getElementById('emptyState');
+            if (es) es.remove();
+        }
+
+        function scrollToBottom() {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Send message on Enter key
-        userInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !sendBtn.disabled) {
-                sendMessage();
-            }
-        });
+        // ===== MESSAGE RENDERING =====
+        function addMessage(text, sender) {
+            removeEmptyState();
 
-        function goHome() {
-            window.location.href = '/';
+            const wrapper = document.createElement('div');
+            wrapper.className = `message ${sender}`;
+
+            const inner = document.createElement('div');
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = text;
+
+            const meta = document.createElement('div');
+            meta.className = 'message-meta';
+            meta.textContent = now();
+
+            inner.appendChild(content);
+            inner.appendChild(meta);
+            wrapper.appendChild(inner);
+            chatBox.appendChild(wrapper);
+            scrollToBottom();
         }
 
-        // Focus on input field on load
-        window.addEventListener('load', () => {
-            userInput.focus();
-            initializeInactivityDetection();
+        function showTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message bot typing-indicator';
+            wrapper.id = id;
+            wrapper.innerHTML = `<div class="message-content"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            chatBox.appendChild(wrapper);
+            scrollToBottom();
+            return id;
+        }
+
+        function removeTypingIndicator(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        // ===== SEND MESSAGE =====
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) {
+                userInput.placeholder = 'Please type something to chat!';
+                userInput.focus();
+                return;
+            }
+
+            addMessage(message, 'user');
+            userInput.value = '';
+            userInput.placeholder = 'Type your message, or click 🎤 to speak...';
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = '...';
+            micBtn.disabled = true;
+
+            const typingId = showTypingIndicator();
+
+            try {
+                const res = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+                removeTypingIndicator(typingId);
+
+                const botText = data.response || 'I appreciate that thought! Tell me more.';
+                addMessage(botText, 'bot');
+
+                if (voiceResponseEnabled) {
+                    speakResponse(botText);
+                }
+            } catch (err) {
+                removeTypingIndicator(typingId);
+                addMessage("I'm having a little trouble. Please try again!", 'bot');
+                console.error(err);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+                micBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Enter key
+        userInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
         });
+
+        // ===== VOICE TOGGLE =====
+        function toggleVoiceResponse() {
+            voiceResponseEnabled = !voiceResponseEnabled;
+            if (voiceResponseEnabled) {
+                voiceToggle.textContent = '🔊 Voice On';
+                voiceToggle.classList.add('active');
+            } else {
+                voiceToggle.textContent = '🔇 Voice Off';
+                voiceToggle.classList.remove('active');
+                ttsAudio.pause();
+            }
+        }
+
+        // ===== TTS — gTTS via /speak_response =====
+        async function speakResponse(text) {
+            const language = langSelect.value;
+            try {
+                const res = await fetch('/speak_response', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, language })
+                });
+                const data = await res.json();
+                if (data.success && data.audio_b64) {
+                    ttsAudio.src = 'data:audio/mpeg;base64,' + data.audio_b64;
+                    ttsAudio.play().catch(() => { });
+                }
+            } catch (e) {
+                console.warn('TTS error:', e);
+            }
+        }
+
+        // ===== SPEECH RECOGNITION (Web Speech API) =====
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const hasSpeechRecognition = !!SpeechRecognition;
+
+        if (!hasSpeechRecognition) {
+            micBtn.title = 'Speech recognition not supported in this browser. Try Chrome.';
+            micBtn.style.opacity = '0.5';
+        }
+
+        function getLangCode(lang) {
+            return lang === 'tamil' ? 'ta-IN' : 'en-US';
+        }
+
+        function startRecognition() {
+            if (!hasSpeechRecognition) {
+                showStatus('⚠️ Speech recognition not supported. Please use Chrome.');
+                setTimeout(hideStatus, 3000);
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = getLangCode(langSelect.value);
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                micBtn.textContent = '⏹';
+                sendBtn.disabled = true;
+                showStatus('🎙️ Listening… speak now');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(r => r[0].transcript)
+                    .join('');
+
+                userInput.value = transcript;
+
+                if (event.results[event.results.length - 1].isFinal) {
+                    showStatus(`✅ Heard: "${transcript}"`);
+                    setTimeout(() => {
+                        hideStatus();
+                        if (transcript.trim()) sendMessage();
+                    }, 600);
+                } else {
+                    showStatus(`🎙️ Hearing: "${transcript}"`);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                const msgs = {
+                    'no-speech': '🔕 No speech detected. Try again.',
+                    'not-allowed': '🚫 Microphone access denied. Please allow mic in browser.',
+                    'network': '🌐 Network error during recognition.',
+                    'aborted': null
+                };
+                const msg = msgs[event.error];
+                if (msg) { showStatus(msg); setTimeout(hideStatus, 3000); }
+                stopRecognition();
+            };
+
+            recognition.onend = () => {
+                stopRecognition();
+            };
+
+            recognition.start();
+        }
+
+        function stopRecognition() {
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            micBtn.textContent = '🎤';
+            sendBtn.disabled = false;
+            if (recognition) {
+                try { recognition.stop(); } catch (_) { }
+                recognition = null;
+            }
+        }
+
+        function toggleMic() {
+            if (isRecording) {
+                stopRecognition();
+                hideStatus();
+            } else {
+                startRecognition();
+            }
+        }
 
         // ===== INACTIVITY DETECTION =====
         let inactivityAlertShown = false;
 
         function initializeInactivityDetection() {
-            // Update activity on page load
             updateUserActivity();
-            
-            // Update activity on user interactions
             document.addEventListener('click', updateUserActivity);
             document.addEventListener('keypress', updateUserActivity);
             document.addEventListener('mousemove', updateUserActivity);
-            
-            // Check inactivity every minute
             setInterval(checkUserInactivity, 60000);
         }
 
         function updateUserActivity() {
             fetch('/update_activity', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user_id: 'web_user' }),
-            })
-            .catch(error => console.error('Error updating activity:', error));
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: 'web_user' })
+            }).catch(() => { });
         }
 
         function checkUserInactivity() {
             fetch('/check_inactivity')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.is_inactive && !inactivityAlertShown) {
                         inactivityAlertShown = true;
@@ -405,68 +781,35 @@
                     } else if (!data.is_inactive) {
                         inactivityAlertShown = false;
                     }
-                })
-                .catch(error => console.error('Error checking inactivity:', error));
+                }).catch(() => { });
         }
 
         function showInactivityAlert(message) {
-            // Create alert modal
-            const alertContainer = document.createElement('div');
-            alertContainer.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                padding: 30px;
-                border-radius: 15px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-                z-index: 10000;
-                max-width: 500px;
-                text-align: center;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            `;
-            
-            alertContainer.innerHTML = `
-                <h2 style="color: #6b8e6f; margin-bottom: 15px; font-size: 1.5em;">Just Checking In</h2>
-                <p style="color: #333; font-size: 1.1em; margin-bottom: 25px; line-height: 1.6;">
-                    ${message}
-                </p>
-                <button onclick="this.parentElement.parentElement.remove(); updateUserActivity();" style="
-                    background-color: #6b8e6f;
-                    color: white;
-                    padding: 12px 30px;
-                    border: none;
-                    border-radius: 10px;
-                    font-size: 1.1em;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: all 0.3s ease;
-                ">
-                    I'm Still Here
-                </button>
-            `;
-            
-            // Add overlay
             const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 9999;
-            `;
-            overlay.onclick = () => {
-                overlay.remove();
-                alertContainer.remove();
-                updateUserActivity();
-            };
-            
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;';
+
+            const alertBox = document.createElement('div');
+            alertBox.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:30px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.25);z-index:10000;max-width:460px;text-align:center;font-family:inherit;';
+            alertBox.innerHTML = `
+                <h2 style="color:#6b8e6f;margin-bottom:12px;font-size:1.4em;">Just Checking In 💚</h2>
+                <p style="color:#444;font-size:1.05em;margin-bottom:24px;line-height:1.6;">${message}</p>
+                <button onclick="this.closest('div').nextSibling.remove();this.closest('div').remove();updateUserActivity();"
+                    style="background:#6b8e6f;color:#fff;padding:12px 28px;border:none;border-radius:10px;font-size:1em;cursor:pointer;font-weight:600;">
+                    I'm Still Here 👋
+                </button>`;
+
+            overlay.onclick = () => { overlay.remove(); alertBox.remove(); updateUserActivity(); };
+            document.body.appendChild(alertBox);
             document.body.appendChild(overlay);
-            document.body.appendChild(alertContainer);
         }
+
+        // ===== INIT =====
+        window.addEventListener('load', () => {
+            userInput.focus();
+            scrollToBottom();
+            initializeInactivityDetection();
+        });
     </script>
 </body>
+
 </html>
