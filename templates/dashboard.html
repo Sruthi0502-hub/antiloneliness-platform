@@ -4,8 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard – Sentimate</title>
+    <title>My Dashboard – Sentimate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --green: #6b8e6f;
+            --green-d: #4e6e52;
+            --wheat: #f5f0e8;
+            --cream: #fffbf6;
+            --text: #2a2a2a;
+            --muted: #7a7a7a;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+            --radius: 22px;
+            --trans: 0.28s cubic-bezier(.4, 0, .2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,152 +27,220 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f3f0 0%, #e8f0e9 100%);
+            font-family: 'Nunito', sans-serif;
+            background: var(--wheat);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
         /* ── Navbar ── */
-        nav.navbar {
-            background: #6b8e6f;
-            padding: 16px 32px;
+        nav {
+            background: var(--green);
+            padding: 16px 36px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.14);
+            sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
         }
 
-        .navbar-brand {
-            color: white;
-            font-size: 1.6em;
-            font-weight: 700;
-            letter-spacing: 1px;
+        @keyframes slideDown {
+            from {
+                transform: translateY(-80px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        .navbar-menu {
+        .brand {
+            color: #fff;
+            font-size: 1.7em;
+            font-weight: 800;
+        }
+
+        .nav-links {
             display: flex;
             gap: 20px;
+            align-items: center;
         }
 
-        .nav-link {
+        .nav-links a {
             color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            font-size: 1em;
-            font-weight: 500;
-            transition: color 0.2s;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: background var(--trans);
         }
 
-        .nav-link:hover {
-            color: white;
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
         }
 
-        /* ── Main content ── */
-        .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-
-        /* ── Welcome banner ── */
-        .welcome-banner {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .welcome-banner .greeting {
-            font-size: 2.4em;
-            color: #3a5c3e;
+        .nav-user {
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 700;
         }
 
-        .welcome-banner .sub {
-            font-size: 1.2em;
-            color: #7a9e7f;
+        /* ── Hero header ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--green) 0%, #4e6e52 100%);
+            padding: 44px 36px 56px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--wheat);
+            border-radius: 40px 40px 0 0;
+        }
+
+        .greeting {
+            font-size: 2.4em;
+            font-weight: 800;
+            color: #fff;
+            animation: fadeInUp 0.55s ease both;
+        }
+
+        .sub-greeting {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.80);
+            font-weight: 600;
             margin-top: 8px;
+            animation: fadeInUp 0.55s 0.1s ease both;
         }
 
-        /* ── Dashboard card grid ── */
-        .dashboard-card {
-            background: #fffbf8;
-            border-radius: 24px;
-            padding: 50px 60px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-            width: 100%;
-            max-width: 720px;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .btn-grid {
+        /* ── Grid ── */
+        .container {
+            padding: 32px 28px 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+            width: 100%;
+            max-width: 640px;
         }
 
-        .dash-btn {
+        /* ── Cards ── */
+        .dash-card {
+            background: var(--cream);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            border: none;
-            border-radius: 18px;
-            padding: 34px 20px;
-            font-size: 1.3em;
-            font-weight: 600;
-            cursor: pointer;
+            padding: 36px 20px;
             text-decoration: none;
-            transition: transform 0.25s, box-shadow 0.25s;
-            min-height: 130px;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 1.2em;
+            text-align: center;
+            min-height: 140px;
+            transition: transform var(--trans), box-shadow var(--trans);
+            animation: fadeInUp 0.55s ease both;
+            border: 2px solid transparent;
         }
 
-        .dash-btn .icon {
-            font-size: 2.4em;
-            line-height: 1;
+        .dash-card:nth-child(1) {
+            animation-delay: 0.10s;
         }
 
-        .dash-btn:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        .dash-card:nth-child(2) {
+            animation-delay: 0.20s;
         }
 
-        .dash-btn:active {
+        .dash-card:nth-child(3) {
+            animation-delay: 0.30s;
+        }
+
+        .dash-card:nth-child(4) {
+            animation-delay: 0.40s;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .dash-card:active {
             transform: scale(0.97);
         }
 
-        .btn-chat {
-            background: #b8d4c3;
-            color: #1a1a1a;
+        .card-icon {
+            font-size: 2.8em;
+            line-height: 1;
+            transition: transform var(--trans);
         }
 
-        .btn-reminder {
-            background: #d4c8b8;
-            color: #1a1a1a;
+        .dash-card:hover .card-icon {
+            transform: scale(1.18) rotate(-4deg);
         }
 
-        .btn-games {
-            background: #c8d4b8;
-            color: #1a1a1a;
+        .card-chat {
+            border-color: #9ecfb0;
+            background: linear-gradient(145deg, #f2fdf5, #e4f6ea);
         }
 
-        .btn-voice {
-            background: #c8c0d8;
-            color: #1a1a1a;
+        .card-reminder {
+            border-color: #d4b896;
+            background: linear-gradient(145deg, #fdf8f2, #f5ede0);
         }
 
-        @media (max-width: 600px) {
-            .btn-grid {
+        .card-games {
+            border-color: #a8c888;
+            background: linear-gradient(145deg, #f5fdf0, #e8f5d8);
+        }
+
+        .card-voice {
+            border-color: #b0a8d8;
+            background: linear-gradient(145deg, #f5f0fd, #e8e0f8);
+        }
+
+        .card-label {
+            font-size: 1em;
+            color: var(--text);
+        }
+
+        @media (max-width:520px) {
+            .grid {
                 grid-template-columns: 1fr;
             }
 
-            .dashboard-card {
-                padding: 36px 24px;
-            }
-
-            .welcome-banner .greeting {
+            .greeting {
                 font-size: 1.8em;
             }
         }
@@ -167,49 +249,41 @@
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-brand">Sentimate</div>
-        <div class="navbar-menu">
-            <a href="/" class="nav-link">Home</a>
-            <a href="/dashboard" class="nav-link">Dashboard</a>
-            <a href="/games" class="nav-link">Games</a>
+    <nav>
+        <div class="brand">Sentimate</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/games">Games</a>
             {% if session.username %}
-            <span class="nav-link" style="color:rgba(255,255,255,0.9); font-weight:600;">👤 {{ session.username
-                }}</span>
-            <a href="/logout" class="nav-link" style="color:#ffcdd2; font-weight:600;">Logout</a>
+            <span class="nav-user">👤 {{ session.username }}</span>
+            <a href="/logout" style="color:#ffe0e0;">Logout</a>
             {% endif %}
         </div>
     </nav>
 
-    <!-- Main -->
-    <div class="container">
-        <div class="welcome-banner">
-            <div class="greeting">
-                Welcome back, {{ session.username or 'Friend' }}! 👋
-            </div>
-            <div class="sub">What would you like to do today?</div>
-        </div>
+    <div class="page-header">
+        <div class="greeting">Welcome back, {{ session.username or 'Friend' }}! 👋</div>
+        <div class="sub-greeting">What would you like to do today?</div>
+    </div>
 
-        <div class="dashboard-card">
-            <div class="btn-grid">
-                <a href="/chat" class="dash-btn btn-chat">
-                    <span class="icon">💬</span>
-                    Chat
-                </a>
-                <a href="/medication" class="dash-btn btn-reminder">
-                    <span class="icon">💊</span>
-                    Reminders
-                </a>
-                <a href="/games" class="dash-btn btn-games">
-                    <span class="icon">🎮</span>
-                    Games
-                </a>
-                <a href="/voice_assistant" class="dash-btn btn-voice">
-                    <span class="icon">🎙️</span>
-                    Voice Assistant
-                </a>
-            </div>
+    <div class="container">
+        <div class="grid">
+            <a href="/chat" class="dash-card card-chat">
+                <span class="card-icon">💬</span>
+                <span class="card-label">Chat</span>
+            </a>
+            <a href="/medication" class="dash-card card-reminder">
+                <span class="card-icon">💊</span>
+                <span class="card-label">Reminders</span>
+            </a>
+            <a href="/games" class="dash-card card-games">
+                <span class="card-icon">🎮</span>
+                <span class="card-label">Games</span>
+            </a>
+            <a href="/voice_assistant" class="dash-card card-voice">
+                <span class="card-icon">🎙️</span>
+                <span class="card-label">Voice Assistant</span>
+            </a>
         </div>
     </div>
 

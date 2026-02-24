@@ -5,7 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pallanguli – Sentimate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --brown: #7a5c38;
+            --brown-d: #5c3d1e;
+            --amber: #c0824a;
+            --wheat: #fdf6ec;
+            --cream: #fffbf6;
+            --shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+            --trans: 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,121 +25,204 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #fdf3e0 0%, #f5e9d0 100%);
+            font-family: 'Nunito', sans-serif;
+            background: var(--wheat);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        nav.navbar {
-            background: #7a5c38;
-            padding: 14px 28px;
+        /* ── Navbar ── */
+        nav {
+            background: var(--brown);
+            padding: 14px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.16);
+            animation: slideDown 0.5s ease;
         }
 
-        .navbar-brand {
-            color: white;
-            font-size: 1.4em;
-            font-weight: 700;
+        @keyframes slideDown {
+            from {
+                transform: translateY(-60px);
+                opacity: 0
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
         }
 
-        .nav-link {
+        .brand {
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: 800;
+        }
+
+        .nav-links a {
             color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 30px;
+            margin-left: 10px;
+            transition: background var(--trans);
         }
 
-        .nav-link:hover {
-            color: white;
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
         }
 
+        /* ── Main layout ── */
         .container {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px 20px;
+            padding: 28px 20px 48px;
+            animation: fadeInUp 0.55s ease both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
         }
 
         h1 {
-            font-size: 2.4em;
-            color: #5c3d1e;
-            font-weight: 700;
-            margin: 20px 0 6px;
+            font-size: 2.2em;
+            color: var(--brown-d);
+            font-weight: 800;
+            margin-bottom: 4px;
         }
 
         .subtitle {
             color: #9a7a5a;
-            font-size: 1em;
-            margin-bottom: 24px;
+            font-size: 0.95em;
+            font-weight: 600;
+            margin-bottom: 22px;
         }
 
         /* ── Status bar ── */
         .status-bar {
             display: flex;
-            gap: 40px;
-            background: #fffbf4;
-            border-radius: 14px;
-            padding: 16px 36px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 28px;
+            gap: 32px;
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 14px 36px;
+            box-shadow: var(--shadow);
+            margin-bottom: 22px;
             font-size: 1.1em;
-            color: #5c3d1e;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--brown-d);
         }
 
-        .status-item span {
-            color: #c0824a;
-            font-size: 1.3em;
+        .status-bar span.val {
+            color: var(--amber);
+            font-size: 1.25em;
+        }
+
+        /* ── Turn indicator ── */
+        .turn-pill {
+            font-size: 1.05em;
+            font-weight: 700;
+            background: #fff8ec;
+            border: 2px solid #deb882;
+            color: var(--brown-d);
+            padding: 9px 28px;
+            border-radius: 30px;
+            margin-bottom: 14px;
+            transition: background var(--trans);
+        }
+
+        /* ── Message ── */
+        .msg-box {
+            display: none;
+            background: #fff9e0;
+            border: 2px solid #f0c860;
+            border-radius: 14px;
+            padding: 11px 28px;
+            font-size: 1.05em;
+            font-weight: 700;
+            color: var(--brown-d);
+            margin-bottom: 14px;
+            animation: popIn 0.3s ease;
+        }
+
+        .msg-box.show {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.85);
+                opacity: 0
+            }
+
+            70% {
+                transform: scale(1.04)
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
         }
 
         /* ── Board ── */
         .board-wrapper {
-            background: #a0622a;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            margin-bottom: 28px;
+            background: linear-gradient(145deg, #b87a40, #8a5020);
+            border-radius: 24px;
+            padding: 22px 22px 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+            margin-bottom: 22px;
         }
 
         .board-label {
             text-align: center;
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
 
         .board-row {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 14px;
         }
 
+        /* ── Pits ── */
         .pit {
-            width: 70px;
-            height: 70px;
-            background: #fdf3e0;
+            width: 68px;
+            height: 68px;
+            background: #fdf4e0;
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
             cursor: pointer;
             border: 3px solid #c09060;
-            transition: all 0.2s;
-            position: relative;
+            transition: transform var(--trans), background var(--trans), box-shadow var(--trans);
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .pit:hover:not(.empty) {
-            background: #ffe0b0;
-            transform: scale(1.08);
+            background: #ffe8b0;
+            transform: scale(1.13);
+            box-shadow: 0 4px 16px rgba(192, 130, 74, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .pit:active:not(.empty) {
@@ -136,26 +231,28 @@
 
         .pit.empty {
             cursor: default;
-            opacity: 0.6;
+            opacity: 0.55;
         }
 
         .pit.selected {
             background: #ffe082;
             border-color: #f0a030;
-            box-shadow: 0 0 0 4px rgba(240, 160, 40, 0.4);
+            box-shadow: 0 0 0 4px rgba(240, 160, 40, 0.35);
         }
 
         .pit .seed-count {
-            font-size: 1.4em;
-            font-weight: 700;
-            color: #5c3d1e;
+            font-size: 1.35em;
+            font-weight: 800;
+            color: var(--brown-d);
         }
 
         .pit .seed-icon {
-            font-size: 0.7em;
-            color: #9a7a5a;
+            font-size: 0.65em;
+            color: #b07840;
+            font-weight: 600;
         }
 
+        /* ── Stores ── */
         .store-row {
             display: flex;
             gap: 12px;
@@ -164,124 +261,106 @@
 
         .store {
             width: 100px;
-            height: 80px;
-            background: #c8a060;
-            border-radius: 14px;
+            height: 76px;
+            background: linear-gradient(145deg, #d4a46a, #b07840);
+            border-radius: 16px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            border: 3px solid #a07840;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
+            border: 3px solid #9a6030;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .store .store-label {
-            font-size: 0.7em;
-            color: #fffbf4;
-            font-weight: 600;
+        .store .slabel {
+            font-size: 0.65em;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 700;
             text-transform: uppercase;
         }
 
-        .store .store-count {
+        .store .scount {
             font-size: 2em;
-            font-weight: 700;
-            color: white;
-        }
-
-        /* ── Turn indicator ── */
-        .turn-indicator {
-            font-size: 1.2em;
-            color: #5c3d1e;
-            font-weight: 600;
-            background: #fff3dc;
-            padding: 10px 28px;
-            border-radius: 30px;
-            margin-bottom: 16px;
-            border: 2px solid #deb080;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.1;
         }
 
         /* ── Controls ── */
         .controls {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             margin-bottom: 24px;
         }
 
         .btn {
             border: none;
-            border-radius: 12px;
-            padding: 14px 32px;
+            border-radius: 14px;
+            padding: 14px 36px;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform var(--trans), box-shadow var(--trans);
         }
 
         .btn-reset {
-            background: #c0824a;
-            color: white;
+            background: linear-gradient(135deg, #c0824a, #9a5828);
+            color: #fff;
         }
 
-        .btn-reset:hover {
-            background: #a0622a;
-            transform: scale(1.03);
+        .btn:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
         }
 
-        /* ── Rules ── */
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ── Rules card ── */
         .rules-card {
-            background: #fffbf4;
-            border-radius: 16px;
-            padding: 24px 32px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            max-width: 600px;
+            background: var(--cream);
+            border-radius: 18px;
+            padding: 22px 30px;
+            box-shadow: var(--shadow);
+            max-width: 580px;
             width: 100%;
         }
 
         .rules-card h3 {
-            color: #5c3d1e;
-            margin-bottom: 12px;
-            font-size: 1.2em;
+            color: var(--brown-d);
+            font-size: 1.1em;
+            margin-bottom: 10px;
         }
 
         .rules-card ul {
             color: #7a5c38;
             line-height: 2;
-            padding-left: 20px;
+            padding-left: 18px;
+            font-size: 0.97em;
         }
 
-        /* ── Message overlay ── */
-        .message {
-            display: none;
-            background: #ffe082;
-            border: 2px solid #f0a030;
-            border-radius: 12px;
-            padding: 12px 28px;
-            font-size: 1.1em;
-            color: #5c3d1e;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .message.show {
-            display: block;
-        }
-
-        @media (max-width: 600px) {
+        @media(max-width:560px) {
             .pit {
-                width: 52px;
-                height: 52px;
+                width: 50px;
+                height: 50px;
             }
 
             .pit .seed-count {
-                font-size: 1.1em;
+                font-size: 1em;
             }
 
             .board-row {
-                gap: 8px;
+                gap: 6px;
             }
 
             .board-wrapper {
                 padding: 14px;
+            }
+
+            h1 {
+                font-size: 1.7em;
             }
         }
     </style>
@@ -289,45 +368,42 @@
 
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-brand">Sentimate</div>
-        <div>
-            <a href="/traditional_games" class="nav-link">← Traditional Games</a>
-            <a href="/games" class="nav-link">All Games</a>
+    <nav>
+        <div class="brand">Sentimate</div>
+        <div class="nav-links">
+            <a href="/traditional_games">← Traditional</a>
+            <a href="/games">All Games</a>
         </div>
     </nav>
 
     <div class="container">
         <h1>🪨 Pallanguli</h1>
-        <p class="subtitle">Classic South Indian mancala – sow & capture the seeds!</p>
+        <p class="subtitle">Classic South Indian mancala – sow &amp; capture the seeds!</p>
 
         <div class="status-bar">
-            <div class="status-item">You: <span id="score-p1">0</span></div>
-            <div class="status-item">Computer: <span id="score-p2">0</span></div>
-            <div class="status-item">Round: <span id="round">1</span></div>
+            <div>You &nbsp;<span class="val" id="score-p1">0</span></div>
+            <div>Computer &nbsp;<span class="val" id="score-p2">0</span></div>
+            <div>Round &nbsp;<span class="val" id="round">1</span></div>
         </div>
 
-        <div class="turn-indicator" id="turn-text">🟢 Your turn – click a pit to sow seeds</div>
-        <div class="message" id="msg-box"></div>
+        <div class="turn-pill" id="turn-text">🟢 Your turn – pick a pit!</div>
+        <div class="msg-box" id="msg-box"></div>
 
         <div class="board-wrapper">
-            <!-- Computer's row (top, reversed) -->
             <div class="board-label">Computer's Pits</div>
             <div class="board-row" id="row-p2"></div>
 
-            <!-- Stores row -->
             <div class="store-row">
-                <div class="store" id="store-p2">
-                    <div class="store-label">Computer</div>
-                    <div class="store-count" id="store-p2-count">0</div>
+                <div class="store">
+                    <div class="slabel">Computer</div>
+                    <div class="scount" id="store-p2-count">0</div>
                 </div>
-                <div class="store" id="store-p1">
-                    <div class="store-label">You</div>
-                    <div class="store-count" id="store-p1-count">0</div>
+                <div class="store">
+                    <div class="slabel">You</div>
+                    <div class="scount" id="store-p1-count">0</div>
                 </div>
             </div>
 
-            <!-- Player's row (bottom) -->
             <div class="board-label" style="margin-top:14px;">Your Pits</div>
             <div class="board-row" id="row-p1"></div>
         </div>
@@ -339,35 +415,25 @@
         <div class="rules-card">
             <h3>📜 How to Play</h3>
             <ul>
-                <li>The board has 2 rows of 7 pits, each starting with 6 seeds.</li>
-                <li>Click one of <strong>your pits</strong> (bottom row) to pick up its seeds.</li>
-                <li>Seeds are sown anti-clockwise, one per pit.</li>
-                <li>If last seed lands in a pit with seeds → continue sowing from that pit.</li>
-                <li>If last seed lands in an <strong>empty pit</strong>, your turn ends.</li>
-                <li>If the pit opposite the empty pit has seeds, you <strong>capture</strong> them!</li>
-                <li>Player with the most seeds at the end wins.</li>
+                <li>2 rows of 7 pits, each starting with <strong>6 seeds</strong>.</li>
+                <li>Click one of <strong>your pits</strong> (bottom row) to sow seeds anti-clockwise.</li>
+                <li>If the last seed lands on a non-empty pit → continue sowing.</li>
+                <li>If it lands on an <strong>empty pit</strong>, your turn ends.</li>
+                <li>Empty pit + seeds opposite → you <strong>capture</strong> them!</li>
+                <li>Most seeds at the end wins! 🏆</li>
             </ul>
         </div>
     </div>
 
     <script>
-        // ── Game state ──────────────────────────────────────────────────────────
-        const PITS = 7;
-        const SEEDS_PER_PIT = 6;
+        const PITS = 7, SEEDS = 6;
         let board, stores, currentPlayer, gameOver, round;
 
         function initState() {
-            board = [
-                Array(PITS).fill(SEEDS_PER_PIT), // row 0 = player 1 (bottom)
-                Array(PITS).fill(SEEDS_PER_PIT)  // row 1 = player 2 (top)
-            ];
-            stores = [0, 0];
-            currentPlayer = 0; // 0=player1, 1=computer
-            gameOver = false;
-            round = 1;
+            board = [Array(PITS).fill(SEEDS), Array(PITS).fill(SEEDS)];
+            stores = [0, 0]; currentPlayer = 0; gameOver = false; round = 1;
         }
 
-        // ── Render ──────────────────────────────────────────────────────────────
         function render() {
             renderRow('row-p1', 0, true);
             renderRow('row-p2', 1, false);
@@ -378,140 +444,83 @@
             document.getElementById('round').textContent = round;
             document.getElementById('turn-text').textContent =
                 gameOver ? '🏁 Game Over!' :
-                    (currentPlayer === 0 ? '🟢 Your turn – click a pit to sow seeds' : '🤖 Computer thinking…');
+                    (currentPlayer === 0 ? '🟢 Your turn – pick a pit!' : '🤖 Computer thinking…');
         }
 
         function renderRow(rowId, player, clickable) {
-            const el = document.getElementById(rowId);
-            el.innerHTML = '';
+            const el = document.getElementById(rowId); el.innerHTML = '';
             const pits = player === 1 ? [...board[1]].reverse() : board[0];
-            const actualIndices = player === 1 ? [...Array(PITS).keys()].map(i => PITS - 1 - i) : [...Array(PITS).keys()];
-
-            pits.forEach((seeds, idx) => {
+            const idx = player === 1 ? [...Array(PITS).keys()].map(i => PITS - 1 - i) : [...Array(PITS).keys()];
+            pits.forEach((seeds, i) => {
                 const pit = document.createElement('div');
                 pit.className = 'pit' + (seeds === 0 ? ' empty' : '');
                 pit.innerHTML = `<span class="seed-count">${seeds}</span><span class="seed-icon">seeds</span>`;
-                if (clickable && !gameOver && currentPlayer === 0 && seeds > 0) {
-                    pit.addEventListener('click', () => playerMove(actualIndices[idx]));
-                }
+                if (clickable && !gameOver && currentPlayer === 0 && seeds > 0)
+                    pit.addEventListener('click', () => playerMove(idx[i]));
                 el.appendChild(pit);
             });
         }
 
-        // ── Sow logic ───────────────────────────────────────────────────────────
         function sow(player, pitIndex) {
-            let seeds = board[player][pitIndex];
-            board[player][pitIndex] = 0;
-
-            let row = player;
-            let pos = pitIndex;
-            let lastRow, lastPos;
-
+            let seeds = board[player][pitIndex]; board[player][pitIndex] = 0;
+            let row = player, pos = pitIndex, lastRow, lastPos;
             while (seeds > 0) {
-                // Move to next pit
-                if (row === 0) { pos++; }
-                else { pos--; }
-
-                // Switch rows at ends
+                if (row === 0) { pos++; } else { pos--; }
                 if (row === 0 && pos >= PITS) { row = 1; pos = 0; }
                 else if (row === 1 && pos < 0) { row = 0; pos = PITS - 1; }
-
-                board[row][pos]++;
-                seeds--;
-                lastRow = row;
-                lastPos = pos;
+                board[row][pos]++; seeds--; lastRow = row; lastPos = pos;
             }
             return { lastRow, lastPos };
         }
 
         function doMove(player, pitIndex) {
             let { lastRow, lastPos } = sow(player, pitIndex);
-
-            // Continue if landing pit had seeds before sowing (now >1)
             while (board[lastRow][lastPos] > 1) {
-                const takeFrom = board[lastRow][lastPos];
-                let res = sow(lastRow, lastPos);
-                lastRow = res.lastRow;
-                lastPos = res.lastPos;
+                let res = sow(lastRow, lastPos); lastRow = res.lastRow; lastPos = res.lastPos;
             }
-
-            // Capture: landing in empty pit (now ==1) → take opposite
             if (board[lastRow][lastPos] === 1) {
-                const oppRow = 1 - lastRow;
-                const oppPos = PITS - 1 - lastPos;
+                const oppRow = 1 - lastRow, oppPos = PITS - 1 - lastPos;
                 if (board[oppRow][oppPos] > 0) {
                     stores[player] += board[lastRow][lastPos] + board[oppRow][oppPos];
-                    board[lastRow][lastPos] = 0;
-                    board[oppRow][oppPos] = 0;
-                    showMsg(player === 0 ? '🎉 Capture! You grabbed seeds from the opponent!' : '🤖 Computer captured!');
+                    board[lastRow][lastPos] = 0; board[oppRow][oppPos] = 0;
+                    showMsg(player === 0 ? '🎉 Capture! You grabbed seeds!' : '🤖 Computer captured seeds!');
                 }
             }
-
             checkGameOver();
         }
 
-        // ── Player move ─────────────────────────────────────────────────────────
         function playerMove(pitIndex) {
             if (gameOver || currentPlayer !== 0) return;
             if (board[0][pitIndex] === 0) return;
-            clearMsg();
-            doMove(0, pitIndex);
-            if (!gameOver) {
-                currentPlayer = 1;
-                render();
-                setTimeout(computerMove, 800);
-            } else {
-                render();
-            }
+            clearMsg(); doMove(0, pitIndex);
+            if (!gameOver) { currentPlayer = 1; render(); setTimeout(computerMove, 900); }
+            else render();
         }
 
-        // ── Computer move (greedy) ───────────────────────────────────────────────
         function computerMove() {
             if (gameOver) return;
-            const available = board[1].map((s, i) => s > 0 ? i : -1).filter(i => i >= 0);
-            if (available.length === 0) { checkGameOver(); render(); return; }
-
-            // Pick pit with most seeds
-            const best = available.reduce((a, b) => board[1][a] >= board[1][b] ? a : b);
-            doMove(1, best);
-            currentPlayer = 0;
-            render();
+            const avail = board[1].map((s, i) => s > 0 ? i : -1).filter(i => i >= 0);
+            if (!avail.length) { checkGameOver(); render(); return; }
+            const best = avail.reduce((a, b) => board[1][a] >= board[1][b] ? a : b);
+            doMove(1, best); currentPlayer = 0; render();
         }
 
-        // ── Helpers ─────────────────────────────────────────────────────────────
         function checkGameOver() {
-            const p1Empty = board[0].every(s => s === 0);
-            const p2Empty = board[1].every(s => s === 0);
-            if (p1Empty || p2Empty) {
-                // Sweep remaining seeds
+            if (board[0].every(s => s === 0) || board[1].every(s => s === 0)) {
                 board[0].forEach((s, i) => { stores[0] += s; board[0][i] = 0; });
                 board[1].forEach((s, i) => { stores[1] += s; board[1][i] = 0; });
                 gameOver = true;
-                if (stores[0] > stores[1]) showMsg('🏆 You win! Well done!');
-                else if (stores[1] > stores[0]) showMsg('🤖 Computer wins this round. Try again!');
+                if (stores[0] > stores[1]) showMsg('🏆 You win! Excellent!');
+                else if (stores[1] > stores[0]) showMsg('🤖 Computer wins. Try again!');
                 else showMsg("🤝 It's a draw!");
             }
         }
 
-        function showMsg(text) {
-            const el = document.getElementById('msg-box');
-            el.textContent = text;
-            el.classList.add('show');
-        }
-        function clearMsg() {
-            document.getElementById('msg-box').classList.remove('show');
-        }
+        function showMsg(t) { const el = document.getElementById('msg-box'); el.textContent = t; el.classList.add('show'); }
+        function clearMsg() { document.getElementById('msg-box').classList.remove('show'); }
+        function resetGame() { if (!gameOver) round++; initState(); clearMsg(); render(); }
 
-        function resetGame() {
-            if (!gameOver) round++;
-            initState();
-            clearMsg();
-            render();
-        }
-
-        // ── Boot ─────────────────────────────────────────────────────────────────
-        initState();
-        render();
+        initState(); render();
     </script>
 </body>
 

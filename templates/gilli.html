@@ -4,8 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gilli – Sentimate</title>
+    <title>Gilli-Danda – Sentimate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --green: #3e7e3e;
+            --green-d: #1e5e1e;
+            --green-l: #c8e6c9;
+            --sky: #e8f5e9;
+            --cream: #f9fff9;
+            --shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
+            --trans: 0.26s cubic-bezier(.4, 0, .2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,182 +25,251 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(160deg, #e8f5e9 0%, #dff0df 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        nav.navbar {
-            background: #3a6e3a;
-            padding: 14px 28px;
+        /* ── Navbar ── */
+        nav {
+            background: var(--green-d);
+            padding: 14px 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 3px 16px rgba(0, 0, 0, 0.16);
+            animation: slideDown 0.5s ease;
         }
 
-        .navbar-brand {
-            color: white;
-            font-size: 1.4em;
-            font-weight: 700;
+        @keyframes slideDown {
+            from {
+                transform: translateY(-60px);
+                opacity: 0
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1
+            }
         }
 
-        .nav-link {
+        .brand {
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: 800;
+        }
+
+        .nav-links a {
             color: rgba(255, 255, 255, 0.85);
             text-decoration: none;
-            margin-left: 20px;
-            font-weight: 500;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 30px;
+            margin-left: 8px;
+            transition: background var(--trans);
         }
 
-        .nav-link:hover {
-            color: white;
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
         }
 
+        /* ── Page intro ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--green), var(--green-d));
+            padding: 40px 30px 56px;
+            text-align: center;
+            position: relative;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 38px;
+            background: linear-gradient(160deg, #e8f5e9, #dff0df);
+            border-radius: 40px 40px 0 0;
+        }
+
+        .page-header h1 {
+            font-size: 2.4em;
+            font-weight: 800;
+            color: #fff;
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        .page-header p {
+            font-size: 1em;
+            color: rgba(255, 255, 255, 0.78);
+            font-weight: 600;
+            margin-top: 8px;
+            animation: fadeInUp 0.5s 0.1s ease both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── Container ── */
         .container {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px 20px;
+            padding: 28px 20px 48px;
         }
 
-        h1 {
-            font-size: 2.4em;
-            color: #1b5e20;
-            font-weight: 700;
-            margin: 20px 0 6px;
-        }
-
-        .subtitle {
-            color: #558b2f;
-            font-size: 1em;
-            margin-bottom: 28px;
-        }
-
-        /* ── Score board ── */
+        /* ── Scoreboard ── */
         .scoreboard {
             display: flex;
-            gap: 30px;
-            background: white;
-            border-radius: 16px;
-            padding: 18px 40px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            gap: 20px;
+            background: var(--cream);
+            border-radius: 18px;
+            padding: 16px 36px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            animation: fadeInUp 0.5s 0.1s ease both;
         }
 
         .score-item {
             text-align: center;
+            min-width: 72px;
         }
 
-        .score-label {
-            font-size: 0.85em;
-            color: #558b2f;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .score-value {
-            font-size: 2.4em;
+        .slabel {
+            font-size: 0.75em;
+            color: var(--green);
             font-weight: 700;
-            color: #1b5e20;
+            text-transform: uppercase;
+            letter-spacing: .5px;
         }
 
-        /* ── Field (arena) ── */
+        .sval {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--green-d);
+        }
+
+        /* ── Field ── */
         .field-wrapper {
-            background: #4caf50;
+            background: linear-gradient(145deg, #66bb6a, #3a8a3a);
             border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.20);
             width: 100%;
-            max-width: 640px;
-            margin-bottom: 28px;
-            position: relative;
+            max-width: 600px;
+            margin-bottom: 22px;
+            animation: fadeInUp 0.5s 0.15s ease both;
         }
 
         .field-inner {
-            background: linear-gradient(180deg, #66bb6a, #388e3c);
+            background: linear-gradient(180deg, #76c87a, #388e3c);
             border-radius: 16px;
-            height: 240px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 20px;
+            height: 220px;
             position: relative;
             overflow: hidden;
             border: 3px solid #2e7d32;
         }
 
-        /* Ground */
+        .grass-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
+        }
+
         .ground {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50px;
-            background: #8d6e63;
-            border-top: 3px solid #6d4c41;
+            height: 54px;
+            background: linear-gradient(180deg, #8d6e63, #6d4c41);
+            border-top: 3px solid #5d3c31;
         }
 
-        /* Gilli (small stick) */
-        .gilli {
+        .pitch {
             position: absolute;
-            width: 40px;
-            height: 10px;
-            background: #fff8e1;
-            border-radius: 5px;
-            bottom: 48px;
+            bottom: 54px;
             left: 50%;
             transform: translateX(-50%);
-            transition: all 0.15s;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            width: 60px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+        }
+
+        /* Gilli */
+        .gilli {
+            position: absolute;
+            width: 42px;
+            height: 10px;
+            background: linear-gradient(90deg, #fff8e1, #ffe082);
+            border-radius: 6px;
+            bottom: 52px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            transition: opacity 0.2s;
         }
 
         .gilli.flying {
-            animation: gilliFlying var(--fly-dur, 0.7s) ease-out forwards;
+            animation: gilliArc var(--fly-dur, 0.75s) ease-out forwards;
         }
 
-        @keyframes gilliFlying {
+        @keyframes gilliArc {
             0% {
-                bottom: 48px;
+                bottom: 52px;
                 left: 50%;
                 transform: translateX(-50%) rotate(0deg);
                 opacity: 1;
             }
 
-            40% {
-                bottom: 160px;
-                left: calc(50% + var(--fly-x, 60px));
-                transform: translateX(-50%) rotate(180deg);
+            45% {
+                bottom: 140px;
+                left: calc(50% + var(--fly-x, 70px));
+                transform: translateX(-50%) rotate(200deg);
                 opacity: 1;
             }
 
             100% {
-                bottom: 50px;
-                left: calc(50% + var(--land-x, 140px));
-                transform: translateX(-50%) rotate(360deg);
-                opacity: 0.6;
+                bottom: 54px;
+                left: calc(50% + var(--land-x, 150px));
+                transform: translateX(-50%) rotate(400deg);
+                opacity: 0.55;
             }
         }
 
-        /* Danda (stick) */
+        /* Danda */
         .danda {
             position: absolute;
             width: 10px;
-            height: 90px;
-            background: linear-gradient(180deg, #a1887f, #6d4c41);
-            border-radius: 5px;
-            bottom: 48px;
+            height: 86px;
+            background: linear-gradient(180deg, #bcaaa4, #6d4c41);
+            border-radius: 6px;
+            bottom: 52px;
             left: 50%;
             transform: translateX(-50%) rotate(-10deg);
             transform-origin: bottom center;
-            transition: transform 0.2s;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .danda.swinging {
-            animation: swing 0.3s ease-in-out;
+            animation: swing 0.32s ease-in-out;
         }
 
         @keyframes swing {
@@ -197,11 +278,11 @@
             }
 
             40% {
-                transform: translateX(-50%) rotate(60deg);
+                transform: translateX(-50%) rotate(64deg);
             }
 
             70% {
-                transform: translateX(-50%) rotate(20deg);
+                transform: translateX(-50%) rotate(24deg);
             }
 
             100% {
@@ -209,60 +290,64 @@
             }
         }
 
-        /* Distance marker */
-        .distance-marker {
-            position: absolute;
-            bottom: 55px;
-            font-size: 0.85em;
-            font-weight: 700;
-            color: #fff9c4;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-            transition: left 0.6s ease-out;
-        }
-
-        /* Feedback text */
+        /* Hit text */
         .hit-text {
             position: absolute;
-            top: 30px;
+            top: 18px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 2em;
-            font-weight: 700;
-            color: white;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            font-size: 1.6em;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.25s;
+            white-space: nowrap;
         }
 
         .hit-text.show {
             opacity: 1;
         }
 
-        /* ── Power meter ── */
-        .power-section {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 640px;
+        .dist-marker {
+            position: absolute;
+            bottom: 60px;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #fff9c4;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+            display: none;
         }
 
-        .power-label {
+        /* ── Power ── */
+        .power-sec {
+            width: 100%;
+            max-width: 600px;
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+            animation: fadeInUp 0.5s 0.2s ease both;
+        }
+
+        .p-label {
             font-size: 1em;
-            color: #2e7d32;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--green-d);
             margin-bottom: 8px;
         }
 
-        .power-bar-bg {
+        .p-bar-bg {
             width: 100%;
             height: 20px;
-            background: #c8e6c9;
+            background: #d0ecd0;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .power-bar-fill {
+        .p-bar-fill {
             height: 100%;
             width: 0%;
             border-radius: 10px;
@@ -270,37 +355,46 @@
             transition: width 0.05s;
         }
 
+        /* ── Hint ── */
+        .hint {
+            color: #558b2f;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
         /* ── Buttons ── */
-        .game-controls {
+        .controls {
             display: flex;
             gap: 16px;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .btn {
             border: none;
             border-radius: 16px;
             padding: 20px 48px;
-            font-size: 1.5em;
-            font-weight: 700;
+            font-size: 1.45em;
+            font-weight: 800;
+            font-family: 'Nunito', sans-serif;
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 180px;
+            min-width: 170px;
+            transition: transform var(--trans), box-shadow var(--trans), filter var(--trans);
         }
 
         .btn-strike {
-            background: linear-gradient(135deg, #388e3c, #1b5e20);
-            color: white;
+            background: linear-gradient(135deg, #4caf50, #1b5e20);
+            color: #fff;
         }
 
         .btn-reset {
-            background: linear-gradient(135deg, #c0824a, #a0622a);
-            color: white;
+            background: linear-gradient(135deg, #c0824a, #8a4820);
+            color: #fff;
         }
 
         .btn:hover {
-            transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
         }
 
         .btn:active {
@@ -308,31 +402,29 @@
         }
 
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.45;
             cursor: default;
             transform: none;
+            box-shadow: none;
         }
 
-        /* hold-to-charge indicator */
-        .hint-text {
-            color: #558b2f;
-            font-size: 0.9em;
-            margin-bottom: 20px;
-        }
-
-        /* ── Rounds history ── */
-        .history-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px 30px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            max-width: 640px;
+        /* ── History ── */
+        .history-card,
+        .rules-card {
+            background: var(--cream);
+            border-radius: 18px;
+            padding: 20px 28px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            animation: fadeInUp 0.5s 0.25s ease both;
         }
 
-        .history-card h3 {
-            color: #2e7d32;
+        .history-card h3,
+        .rules-card h3 {
+            color: var(--green-d);
+            font-size: 1.05em;
             margin-bottom: 10px;
         }
 
@@ -345,44 +437,34 @@
 
         .history-list li {
             background: #e8f5e9;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 6px 16px;
-            font-size: 0.95em;
-            color: #1b5e20;
-            font-weight: 600;
-        }
-
-        /* ── Rules ── */
-        .rules-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px 30px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            max-width: 640px;
-            width: 100%;
-        }
-
-        .rules-card h3 {
-            color: #2e7d32;
-            margin-bottom: 10px;
+            font-size: 0.92em;
+            color: var(--green-d);
+            font-weight: 700;
         }
 
         .rules-card ul {
             color: #558b2f;
-            line-height: 2;
-            padding-left: 20px;
+            line-height: 2.1;
+            padding-left: 18px;
+            font-size: 0.95em;
         }
 
-        @media (max-width: 480px) {
+        @media(max-width:480px) {
             .btn {
                 padding: 16px 28px;
                 font-size: 1.1em;
-                min-width: 140px;
+                min-width: 130px;
             }
 
             .scoreboard {
-                gap: 16px;
-                padding: 14px 20px;
+                gap: 12px;
+                padding: 14px 18px;
+            }
+
+            .page-header h1 {
+                font-size: 1.8em;
             }
         }
     </style>
@@ -390,251 +472,179 @@
 
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-brand">Sentimate</div>
-        <div>
-            <a href="/traditional_games" class="nav-link">← Traditional Games</a>
-            <a href="/games" class="nav-link">All Games</a>
+    <nav>
+        <div class="brand">Sentimate</div>
+        <div class="nav-links">
+            <a href="/traditional_games">← Traditional</a>
+            <a href="/games">All Games</a>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="page-header">
         <h1>🏏 Gilli-Danda</h1>
-        <p class="subtitle">Hold & release to strike – the longer you hold, the farther it flies!</p>
+        <p>Hold & release to strike – the longer you hold, the farther it flies!</p>
+    </div>
 
+    <div class="container">
         <!-- Score -->
         <div class="scoreboard">
             <div class="score-item">
-                <div class="score-label">Score</div>
-                <div class="score-value" id="score">0</div>
+                <div class="slabel">Score</div>
+                <div class="sval" id="score">0</div>
             </div>
             <div class="score-item">
-                <div class="score-label">Strikes</div>
-                <div class="score-value" id="strikes">0</div>
+                <div class="slabel">Strikes</div>
+                <div class="sval" id="strikes">0</div>
             </div>
             <div class="score-item">
-                <div class="score-label">Best</div>
-                <div class="score-value" id="best">0</div>
+                <div class="slabel">Best</div>
+                <div class="sval" id="best">0</div>
             </div>
             <div class="score-item">
-                <div class="score-label">Round</div>
-                <div class="score-value" id="round-num">1</div>
+                <div class="slabel">Round</div>
+                <div class="sval" id="round-num">1</div>
             </div>
         </div>
 
         <!-- Field -->
         <div class="field-wrapper">
             <div class="field-inner" id="field">
+                <div class="grass-top"></div>
                 <div class="ground"></div>
+                <div class="pitch"></div>
                 <div class="gilli" id="gilli"></div>
                 <div class="danda" id="danda"></div>
                 <div class="hit-text" id="hit-text"></div>
-                <div class="distance-marker" id="dist-marker" style="display:none;"></div>
+                <div class="dist-marker" id="dist-marker"></div>
             </div>
         </div>
 
-        <!-- Power meter -->
-        <div class="power-section">
-            <div class="power-label">Power: <span id="power-val">0</span>%</div>
-            <div class="power-bar-bg">
-                <div class="power-bar-fill" id="power-bar"></div>
+        <!-- Power -->
+        <div class="power-sec">
+            <div class="p-label">Power: <span id="power-val">0</span>%</div>
+            <div class="p-bar-bg">
+                <div class="p-bar-fill" id="power-bar"></div>
             </div>
         </div>
 
-        <p class="hint-text">⬇️ Hold the STRIKE button, then release to launch!</p>
+        <p class="hint">⬇️ Hold the STRIKE button then release!</p>
 
-        <!-- Controls -->
-        <div class="game-controls">
+        <div class="controls">
             <button class="btn btn-strike" id="strike-btn" onmousedown="startCharge()" onmouseup="releaseStrike()"
                 ontouchstart="startCharge(event)" ontouchend="releaseStrike(event)">
                 🏏 STRIKE
             </button>
-            <button class="btn btn-reset" onclick="resetGame()">🔄 New Round</button>
+            <button class="btn btn-reset" onclick="resetGame()">🔄 New</button>
         </div>
 
-        <!-- History -->
         <div class="history-card">
             <h3>🗂️ Strike History</h3>
             <ul class="history-list" id="history-list">
-                <li style="color:#9e9e9e; background:#f5f5f5;">No strikes yet</li>
+                <li style="color:#9e9e9e;background:#f0f0f0;">No strikes yet</li>
             </ul>
         </div>
 
-        <!-- Rules -->
         <div class="rules-card">
             <h3>📜 How to Play</h3>
             <ul>
-                <li><strong>Hold</strong> the STRIKE button to charge power (up to 100%).</li>
-                <li><strong>Release</strong> to hit the gilli – it flies based on your power!</li>
-                <li>Each point equals the distance the gilli travels (in feet).</li>
-                <li>Score points over 3 strikes per round.</li>
-                <li>Beat your best score to win!</li>
+                <li><strong>Hold</strong> STRIKE to charge power (0–100%).</li>
+                <li><strong>Release</strong> to hit the gilli – flies by power!</li>
+                <li>Score = distance the gilli travels (feet).</li>
+                <li>3 strikes per round – beat your best!</li>
             </ul>
         </div>
     </div>
 
     <script>
-        // ── State ──────────────────────────────────────────────────────────────
-        let score = 0, best = 0, strikes = 0;
-        let roundNum = 1;
-        let power = 0;
-        let charging = false;
-        let chargeInterval = null;
-        let canStrike = true;
-        const MAX_STRIKES_PER_ROUND = 3;
+        let score = 0, best = 0, strikes = 0, roundNum = 1;
+        let power = 0, charging = false, chargeIv = null, canStrike = true;
+        const MAX = 3;
         const history = [];
 
-        // ── Charge mechanic ─────────────────────────────────────────────────────
         function startCharge(e) {
             if (e) e.preventDefault();
             if (!canStrike) return;
             charging = true;
-            chargeInterval = setInterval(() => {
-                if (!charging) return;
-                power = Math.min(100, power + 3);
-                updatePowerUI();
-            }, 40);
+            chargeIv = setInterval(() => { if (!charging) return; power = Math.min(100, power + 3); updatePower(); }, 40);
         }
-
         function releaseStrike(e) {
             if (e) e.preventDefault();
             if (!canStrike || !charging) return;
-            clearInterval(chargeInterval);
-            charging = false;
-            doStrike(power);
-            power = 0;
-            updatePowerUI();
+            clearInterval(chargeIv); charging = false;
+            doStrike(power); power = 0; updatePower();
         }
-
-        function updatePowerUI() {
+        function updatePower() {
             document.getElementById('power-bar').style.width = power + '%';
             document.getElementById('power-val').textContent = Math.round(power);
-            // Color shifts green→amber→red
-            const r = Math.round((power / 100) * 200);
-            const g = Math.round(150 + (1 - power / 100) * 80);
+            const r = Math.round((power / 100) * 210);
+            const g = Math.round(180 - (power / 100) * 80);
             document.getElementById('power-bar').style.background =
-                `linear-gradient(90deg, #66bb6a, rgb(${r},${g},30))`;
+                `linear-gradient(90deg,#66bb6a,rgb(${r},${g},30))`;
         }
 
-        // ── Strike logic ────────────────────────────────────────────────────────
         function doStrike(p) {
-            canStrike = false;
-            strikes++;
-
-            const distance = Math.round(p * 1.5 + Math.random() * 20);
-            const points = distance;
-            score += points;
-            if (score > best) best = score;
-
-            history.push(`Hit ${strikes}: ${distance} ft (+${points} pts)`);
-
-            // Animate
-            animateStrike(distance, p);
-
-            // After animation, update UI
+            canStrike = false; strikes++;
+            const dist = Math.round(p * 1.5 + Math.random() * 20);
+            score += dist; if (score > best) best = score;
+            history.push(`Hit ${strikes}: ${dist} ft (+${dist} pts)`);
+            animate(dist, p);
             setTimeout(() => {
-                updateScoreUI();
-                renderHistory();
-
-                if (strikes >= MAX_STRIKES_PER_ROUND) {
-                    showHitText('🏆 Round over!');
+                updateUI(); renderHistory();
+                if (strikes >= MAX) {
+                    showHit('🏆 Round over!');
                     document.getElementById('strike-btn').disabled = true;
                     setTimeout(() => {
-                        if (confirm(`Round ${roundNum} done!\nYour score: ${score}\nStart next round?`)) {
-                            nextRound();
-                        }
+                        if (confirm(`Round ${roundNum} done!\nScore: ${score}\nStart next round?`)) nextRound();
                     }, 800);
-                } else {
-                    canStrike = true;
-                }
-            }, 900);
+                } else { canStrike = true; }
+            }, 950);
         }
 
-        function animateStrike(distance, p) {
+        function animate(dist, p) {
             const gilli = document.getElementById('gilli');
             const danda = document.getElementById('danda');
-            const hitTxt = document.getElementById('hit-text');
-            const distMk = document.getElementById('dist-marker');
-
-            // Swing danda
+            const ht = document.getElementById('hit-text');
+            const dm = document.getElementById('dist-marker');
             danda.classList.add('swinging');
             setTimeout(() => danda.classList.remove('swinging'), 350);
-
-            // Fly gilli
-            const flyX = Math.min(200, distance * 0.8);
-            gilli.style.setProperty('--fly-x', flyX + 'px');
-            gilli.style.setProperty('--land-x', flyX * 1.5 + 'px');
-            gilli.style.setProperty('--fly-dur', '0.7s');
+            const fx = Math.min(190, dist * 0.8);
+            gilli.style.setProperty('--fly-x', fx + 'px');
+            gilli.style.setProperty('--land-x', fx * 1.5 + 'px');
+            gilli.style.setProperty('--fly-dur', '0.75s');
             gilli.classList.add('flying');
-
-            // Hit text
-            const msgs = p > 70 ? ['💥 Massive hit!', '🔥 Power shot!', '⚡ Excellent!']
-                : p > 40 ? ['👍 Good hit!', '✅ Nice shot!']
-                    : ['OK hit', 'Soft touch'];
-            hitTxt.textContent = msgs[Math.floor(Math.random() * msgs.length)] + ` – ${distance} ft!`;
-            hitTxt.classList.add('show');
-
-            // Distance marker
-            distMk.style.display = 'block';
-            distMk.textContent = distance + ' ft';
-            distMk.style.left = Math.min(80, 40 + p * 0.4) + '%';
-
-            setTimeout(() => {
-                gilli.classList.remove('flying');
-                hitTxt.classList.remove('show');
-            }, 800);
+            const msgs = p > 70 ? ['💥 Massive hit!', '🔥 Power shot!', '⚡ Excellent!'] :
+                p > 40 ? ['👍 Good hit!', '✅ Nice!'] : ['OK hit', 'Soft touch'];
+            ht.textContent = msgs[Math.floor(Math.random() * msgs.length)] + ` – ${dist} ft!`;
+            ht.classList.add('show');
+            dm.style.display = 'block'; dm.textContent = dist + ' ft';
+            dm.style.left = Math.min(78, 38 + p * 0.38) + '%';
+            setTimeout(() => { gilli.classList.remove('flying'); ht.classList.remove('show'); }, 850);
         }
 
-        function updateScoreUI() {
+        function updateUI() {
             document.getElementById('score').textContent = score;
             document.getElementById('best').textContent = best;
             document.getElementById('strikes').textContent = strikes;
             document.getElementById('round-num').textContent = roundNum;
         }
-
         function renderHistory() {
             const ul = document.getElementById('history-list');
-            if (history.length === 0) {
-                ul.innerHTML = '<li style="color:#9e9e9e; background:#f5f5f5;">No strikes yet</li>';
-                return;
-            }
+            if (!history.length) { ul.innerHTML = '<li style="color:#9e9e9e;background:#f0f0f0;">No strikes yet</li>'; return; }
             ul.innerHTML = history.map(h => `<li>${h}</li>`).join('');
         }
-
-        function showHitText(msg) {
-            const el = document.getElementById('hit-text');
-            el.textContent = msg;
-            el.classList.add('show');
-            setTimeout(() => el.classList.remove('show'), 1500);
+        function showHit(m) {
+            const e = document.getElementById('hit-text'); e.textContent = m; e.classList.add('show');
+            setTimeout(() => e.classList.remove('show'), 1600);
         }
-
-        function nextRound() {
-            roundNum++;
-            strikes = 0;
-            canStrike = true;
-            document.getElementById('strike-btn').disabled = false;
-            updateScoreUI();
-        }
-
+        function nextRound() { roundNum++; strikes = 0; canStrike = true; document.getElementById('strike-btn').disabled = false; updateUI(); }
         function resetGame() {
-            score = 0;
-            strikes = 0;
-            roundNum = 1;
-            power = 0;
-            canStrike = true;
-            charging = false;
-            clearInterval(chargeInterval);
-            history.length = 0;
+            score = 0; best = 0; strikes = 0; roundNum = 1; power = 0; canStrike = true; charging = false;
+            clearInterval(chargeIv); history.length = 0;
             document.getElementById('strike-btn').disabled = false;
-            updatePowerUI();
-            updateScoreUI();
-            renderHistory();
             document.getElementById('dist-marker').style.display = 'none';
+            updatePower(); updateUI(); renderHistory();
         }
-
-        // ── Boot ─────────────────────────────────────────────────────────────────
-        updateScoreUI();
-        renderHistory();
+        updateUI(); renderHistory();
     </script>
 </body>
 
