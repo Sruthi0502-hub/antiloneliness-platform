@@ -1,0 +1,106 @@
+[2026-02-24 10:27:07] INFO database – Database initialised – data/sentimate.db
+[2026-02-24 10:27:08] INFO werkzeug – [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2026-02-24 10:27:08] INFO werkzeug – [33mPress CTRL+C to quit[0m
+[2026-02-24 10:27:08] INFO werkzeug –  * Restarting with watchdog (windowsapi)
+[2026-02-24 10:27:09] INFO database – Database initialised – data/sentimate.db
+[2026-02-24 10:27:09] WARNING werkzeug –  * Debugger is active!
+[2026-02-24 10:27:09] INFO werkzeug –  * Debugger PIN: 502-063-839
+[2026-02-24 10:27:11] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:11] "[32mGET / HTTP/1.1[0m" 302 -
+[2026-02-24 10:27:11] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:11] "GET /login HTTP/1.1" 200 -
+[2026-02-24 10:27:11] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2026-02-24 10:27:14] INFO auth – User authenticated: Sruthi (id=1)
+[2026-02-24 10:27:14] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:14] "[32mPOST /login HTTP/1.1[0m" 302 -
+[2026-02-24 10:27:14] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:14] "GET / HTTP/1.1" 200 -
+[2026-02-24 10:27:18] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:18] "GET /chat HTTP/1.1" 200 -
+[2026-02-24 10:27:18] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:18] "[36mGET /static/css/elderly-friendly.css HTTP/1.1[0m" 304 -
+[2026-02-24 10:27:18] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:18] "GET /get_language HTTP/1.1" 200 -
+[2026-02-24 10:27:18] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:18] "GET /get_language HTTP/1.1" 200 -
+[2026-02-24 10:27:18] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:18] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:19] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:19] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:20] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:20] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:21] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:21] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:21] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:21] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:21] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:21] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:22] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:22] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:22] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:22] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:22] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:22] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:23] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:23] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:23] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:23] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:23] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:23] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:23] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:23] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:23] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:23] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:24] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:24] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:24] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:24] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:24] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:24] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:24] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:24] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:25] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:25] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:25] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:25] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:25] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:25] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:26] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:26] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:26] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:26] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:26] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:26] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:26] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:26] "POST /get_response HTTP/1.1" 200 -
+[2026-02-24 10:27:27] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:27] "POST /speak_response HTTP/1.1" 200 -
+[2026-02-24 10:27:27] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2026-02-24 10:27:29] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:29] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:29] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:29] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:29] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:29] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:29] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:29] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:31] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:31] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:31] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:31] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:32] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:32] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:32] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:32] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:32] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:32] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:33] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:33] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:33] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:33] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:33] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:33] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:33] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:33] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:33] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:33] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:34] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:34] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:34] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:34] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:34] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:34] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:36] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:36] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:36] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:36] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:36] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:36] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:37] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:37] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:37] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:37] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:37] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:37] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:38] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:38] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:38] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:38] "POST /get_response HTTP/1.1" 200 -
+[2026-02-24 10:27:38] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:38] "POST /speak_response HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -
+[2026-02-24 10:27:40] INFO werkzeug – 127.0.0.1 - - [24/Feb/2026 10:27:40] "POST /update_activity HTTP/1.1" 200 -

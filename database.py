@@ -1,83 +1,113 @@
 """
-Database Module for Sentimate
-Handles SQLite database connections and all data operations.
+database.py – Sentimate
+SQLite data layer: connection management, schema init, and all CRUD operations.
 
-Tables:
-- users       : User accounts (id, username, password_hash, created_at)
-- reminders   : Medication reminders (id, user_id, medicine_name, time, created_at)
-- chat_history: Chat message log (id, user_id, sender, message, timestamp)
+Improvements:
+  - WAL journal mode for better concurrent read performance
+  - Index on chat_history(user_id) and reminders(user_id)
+  - Context-manager helper _db() to guarantee connection close
+  - Explicit PRAGMA journal_mode=WAL and synchronous=NORMAL
+  - Consistent logging instead of bare print
+  - Capped chat_history auto-prune (keeps latest N rows per user)
 """
 
 import sqlite3
+import logging
 import os
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Optional, List, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-# ===== CONFIGURATION =====
+logger = logging.getLogger(__name__)
+
+# ── Configuration ─────────────────────────────────────────────────────────────
 
 DB_PATH = os.environ.get('DB_PATH', 'data/sentimate.db')
 
+# Maximum chat messages stored per user before old ones are pruned
+CHAT_HISTORY_MAX = int(os.environ.get('CHAT_HISTORY_MAX', 500))
 
-# ===== CONNECTION =====
+
+# ── Connection ────────────────────────────────────────────────────────────────
+
+@contextmanager
+def _db():
+    """
+    Context manager for SQLite connections.
+    Guarantees the connection is always closed, even on exceptions.
+
+    Usage:
+        with _db() as conn:
+            conn.execute(...)
+    """
+    Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH, isolation_level=None)  # autocommit off via BEGIN
+    conn.row_factory = sqlite3.Row
+    try:
+        # Performance & safety PRAGMAs
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
+        yield conn
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
 
 def get_connection() -> sqlite3.Connection:
     """
-    Create and return a new SQLite database connection.
-    Row factory set so rows behave like dicts.
+    Create and return a raw SQLite connection (legacy compatibility shim).
+    Prefer using the _db() context manager for new code.
     """
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
     return conn
 
 
-# ===== INITIALIZATION =====
+# ── Schema Init ───────────────────────────────────────────────────────────────
 
 def init_db() -> None:
     """
-    Create all required tables if they do not already exist.
+    Create all required tables and indexes if they do not already exist.
     Safe to call on every application startup.
     """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
+    with _db() as conn:
+        conn.executescript("""
+            BEGIN;
 
-        # --- Users table ---
-        cursor.execute("""
+            -- Users
             CREATE TABLE IF NOT EXISTS users (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 username      TEXT    NOT NULL UNIQUE COLLATE NOCASE,
                 password_hash TEXT    NOT NULL,
                 created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
-            )
-        """)
+            );
 
-        # --- Reminders table ---
-        cursor.execute("""
+            -- Medication reminders
             CREATE TABLE IF NOT EXISTS reminders (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 medicine_name TEXT    NOT NULL,
                 time          TEXT    NOT NULL,
                 created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
-            )
-        """)
+            );
 
-        # --- Chat History table ---
-        cursor.execute("""
+            -- Chat history
             CREATE TABLE IF NOT EXISTS chat_history (
                 id        INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 sender    TEXT    NOT NULL CHECK(sender IN ('user', 'bot')),
                 message   TEXT    NOT NULL,
                 timestamp TEXT    NOT NULL DEFAULT (datetime('now'))
-            )
-        """)
+            );
 
-        # --- User Preferences table ---
-        cursor.execute("""
+            -- User preferences (language etc.)
             CREATE TABLE IF NOT EXISTS user_preferences (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -85,28 +115,27 @@ def init_db() -> None:
                 pref_value TEXT    NOT NULL,
                 updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
                 UNIQUE(user_id, pref_key)
-            )
+            );
+
+            -- Indexes for common query patterns
+            CREATE INDEX IF NOT EXISTS idx_reminders_user
+                ON reminders(user_id);
+            CREATE INDEX IF NOT EXISTS idx_chat_history_user
+                ON chat_history(user_id, id DESC);
+            CREATE INDEX IF NOT EXISTS idx_user_pref_lookup
+                ON user_preferences(user_id, pref_key);
+
+            COMMIT;
         """)
-
-        conn.commit()
-        print("Database initialized successfully.")
-    finally:
-        conn.close()
+    logger.info("Database initialised – %s", DB_PATH)
 
 
-
-
-# ===== USER PREFERENCE FUNCTIONS =====
+# ── User Preferences ──────────────────────────────────────────────────────────
 
 def save_user_preference(user_id: int, pref_key: str, pref_value: str) -> None:
-    """
-    Upsert a user preference key/value pair.
-    Example: save_user_preference(1, 'language', 'tamil')
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    """Upsert a user preference key/value pair."""
+    with _db() as conn:
+        conn.execute(
             """
             INSERT INTO user_preferences (user_id, pref_key, pref_value, updated_at)
             VALUES (?, ?, ?, datetime('now'))
@@ -114,240 +143,155 @@ def save_user_preference(user_id: int, pref_key: str, pref_value: str) -> None:
                 pref_value = excluded.pref_value,
                 updated_at = excluded.updated_at
             """,
-            (user_id, pref_key, pref_value)
+            (user_id, pref_key, str(pref_value))
         )
         conn.commit()
-    finally:
-        conn.close()
 
 
 def get_user_preference(user_id: int, pref_key: str, default: str = None) -> Optional[str]:
-    """
-    Retrieve a single user preference value.
-    Returns default if not found.
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    """Retrieve a single user preference value, or *default* if not found."""
+    with _db() as conn:
+        row = conn.execute(
             "SELECT pref_value FROM user_preferences WHERE user_id = ? AND pref_key = ?",
             (user_id, pref_key)
-        )
-        row = cursor.fetchone()
+        ).fetchone()
         return row['pref_value'] if row else default
-    finally:
-        conn.close()
 
 
-# ===== USER FUNCTIONS =====
+# ── Users ────────────────────────────────────────────────────────────────────
 
 def create_user(username: str, password_hash: str) -> Dict[str, Any]:
     """
-    Insert a new user into the database.
-
-    Args:
-        username: Unique username (case-insensitive)
-        password_hash: Bcrypt / werkzeug hashed password
-
-    Returns:
-        Dict with new user's id and username
-
-    Raises:
-        ValueError: If username already exists
+    Insert a new user. Returns {'id': int, 'username': str}.
+    Raises ValueError if the username is already taken.
     """
-    conn = get_connection()
     try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username.strip(), password_hash)
-        )
-        conn.commit()
-        user_id = cursor.lastrowid
-        return {'id': user_id, 'username': username}
+        with _db() as conn:
+            cur = conn.execute(
+                "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                (username.strip(), password_hash)
+            )
+            conn.commit()
+            return {'id': cur.lastrowid, 'username': username.strip()}
     except sqlite3.IntegrityError:
         raise ValueError(f"Username '{username}' is already taken.")
-    finally:
-        conn.close()
 
 
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
-    """
-    Retrieve a user record by username.
-
-    Args:
-        username: The username to look up
-
-    Returns:
-        User dict or None if not found
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    """Return user dict for the given username (case-insensitive), or None."""
+    with _db() as conn:
+        row = conn.execute(
             "SELECT id, username, password_hash, created_at FROM users WHERE username = ? COLLATE NOCASE",
             (username.strip(),)
-        )
-        row = cursor.fetchone()
+        ).fetchone()
         return dict(row) if row else None
-    finally:
-        conn.close()
 
 
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
-    """
-    Retrieve a user record by primary key.
-
-    Args:
-        user_id: The user's integer ID
-
-    Returns:
-        User dict or None if not found
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    """Return user dict by primary key (excludes password_hash), or None."""
+    with _db() as conn:
+        row = conn.execute(
             "SELECT id, username, created_at FROM users WHERE id = ?",
             (user_id,)
-        )
-        row = cursor.fetchone()
+        ).fetchone()
         return dict(row) if row else None
-    finally:
-        conn.close()
 
 
-# ===== REMINDER FUNCTIONS =====
+# ── Reminders ────────────────────────────────────────────────────────────────
 
 def add_reminder_db(user_id: int, medicine_name: str, time: str) -> Dict[str, Any]:
-    """
-    Insert a new medication reminder for a user.
-
-    Args:
-        user_id: Owner's user ID
-        medicine_name: Name of the medication
-        time: Reminder time in HH:MM format
-
-    Returns:
-        Dict with the new reminder's data
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    """Insert a medication reminder. Returns the created record as a dict."""
+    with _db() as conn:
+        cur = conn.execute(
             "INSERT INTO reminders (user_id, medicine_name, time) VALUES (?, ?, ?)",
             (user_id, medicine_name.strip(), time.strip())
         )
         conn.commit()
-        reminder_id = cursor.lastrowid
         return {
-            'id': reminder_id,
-            'user_id': user_id,
-            'medicine_name': medicine_name,
-            'time': time
+            'id':            cur.lastrowid,
+            'user_id':       user_id,
+            'medicine_name': medicine_name.strip(),
+            'time':          time.strip(),
         }
-    finally:
-        conn.close()
 
 
 def get_reminders_for_user(user_id: int) -> List[Dict[str, Any]]:
-    """
-    Retrieve all reminders for a given user, sorted by time.
-
-    Args:
-        user_id: The user's ID
-
-    Returns:
-        List of reminder dicts
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT id, user_id, medicine_name, time, created_at FROM reminders WHERE user_id = ? ORDER BY time ASC",
+    """Return all reminders for a user, ordered by time ascending."""
+    with _db() as conn:
+        rows = conn.execute(
+            "SELECT id, user_id, medicine_name, time, created_at "
+            "FROM reminders WHERE user_id = ? ORDER BY time ASC",
             (user_id,)
-        )
-        return [dict(row) for row in cursor.fetchall()]
-    finally:
-        conn.close()
+        ).fetchall()
+        return [dict(r) for r in rows]
 
 
 def delete_reminder_db(reminder_id: int, user_id: int) -> bool:
     """
-    Delete a reminder belonging to the given user.
-
-    Args:
-        reminder_id: ID of the reminder to delete
-        user_id: Must match the reminder's owner (security check)
-
-    Returns:
-        True if deleted, False if not found / not owned by user
+    Delete a reminder. The user_id check prevents deleting another user's data.
+    Returns True if the row was deleted, False if not found.
     """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    with _db() as conn:
+        cur = conn.execute(
             "DELETE FROM reminders WHERE id = ? AND user_id = ?",
             (reminder_id, user_id)
         )
         conn.commit()
-        return cursor.rowcount > 0
-    finally:
-        conn.close()
+        return cur.rowcount > 0
 
 
-# ===== CHAT HISTORY FUNCTIONS =====
+# ── Chat History ─────────────────────────────────────────────────────────────
 
 def save_message(user_id: int, sender: str, message: str) -> Dict[str, Any]:
     """
-    Persist a chat message to the database.
+    Persist a chat message and auto-prune old messages beyond CHAT_HISTORY_MAX.
 
     Args:
-        user_id: The user this conversation belongs to
         sender: 'user' or 'bot'
-        message: The message text
-
-    Returns:
-        Dict with the saved message data
     """
     if sender not in ('user', 'bot'):
         raise ValueError("sender must be 'user' or 'bot'")
 
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        cursor.execute(
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    with _db() as conn:
+        cur = conn.execute(
             "INSERT INTO chat_history (user_id, sender, message, timestamp) VALUES (?, ?, ?, ?)",
             (user_id, sender, message.strip(), timestamp)
         )
         conn.commit()
+
+        # Prune oldest rows when limit exceeded (keep latest CHAT_HISTORY_MAX)
+        conn.execute(
+            """
+            DELETE FROM chat_history
+            WHERE user_id = ? AND id NOT IN (
+                SELECT id FROM chat_history
+                WHERE user_id = ?
+                ORDER BY id DESC
+                LIMIT ?
+            )
+            """,
+            (user_id, user_id, CHAT_HISTORY_MAX)
+        )
+        conn.commit()
+
         return {
-            'id': cursor.lastrowid,
-            'user_id': user_id,
-            'sender': sender,
-            'message': message,
-            'timestamp': timestamp
+            'id':        cur.lastrowid,
+            'user_id':   user_id,
+            'sender':    sender,
+            'message':   message.strip(),
+            'timestamp': timestamp,
         }
-    finally:
-        conn.close()
 
 
 def get_chat_history(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
-    Retrieve the most recent chat messages for a user.
-
-    Args:
-        user_id: The user's ID
-        limit: Maximum number of messages to return (default 50)
-
-    Returns:
-        List of message dicts ordered oldest → newest
+    Return the most recent *limit* messages for a user, oldest first.
     """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    limit = max(1, min(limit, 500))  # clamp between 1 and 500
+    with _db() as conn:
+        rows = conn.execute(
             """
             SELECT id, user_id, sender, message, timestamp
             FROM chat_history
@@ -356,30 +300,18 @@ def get_chat_history(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             LIMIT ?
             """,
             (user_id, limit)
-        )
-        rows = cursor.fetchall()
-        # Return chronological order (oldest first)
-        return [dict(row) for row in reversed(rows)]
-    finally:
-        conn.close()
+        ).fetchall()
+        return [dict(r) for r in reversed(rows)]
 
 
 def get_recent_messages(user_id: int, limit: int = 10) -> list:
     """
-    Return the last `limit` chat messages as lightweight {sender, message} dicts.
-    Used to feed conversation context to the chatbot.
-
-    Args:
-        user_id: The user's ID
-        limit:   How many messages to return (chronological order, oldest first)
-
-    Returns:
-        List of {'sender': str, 'message': str} dicts
+    Return lightweight {'sender', 'message'} dicts for chatbot context.
+    Oldest first.
     """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute(
+    limit = max(1, min(limit, 50))
+    with _db() as conn:
+        rows = conn.execute(
             """
             SELECT sender, message
             FROM chat_history
@@ -388,35 +320,21 @@ def get_recent_messages(user_id: int, limit: int = 10) -> list:
             LIMIT ?
             """,
             (user_id, limit)
-        )
-        rows = cursor.fetchall()
+        ).fetchall()
         return [{'sender': r['sender'], 'message': r['message']} for r in reversed(rows)]
-    finally:
-        conn.close()
 
 
 def clear_chat_history(user_id: int) -> int:
-    """
-    Delete all chat history for a user.
-
-    Args:
-        user_id: The user's ID
-
-    Returns:
-        Number of rows deleted
-    """
-    conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM chat_history WHERE user_id = ?", (user_id,))
+    """Delete all chat history for a user. Returns number of rows deleted."""
+    with _db() as conn:
+        cur = conn.execute("DELETE FROM chat_history WHERE user_id = ?", (user_id,))
         conn.commit()
-        return cursor.rowcount
-    finally:
-        conn.close()
+        return cur.rowcount
 
 
-# ===== STARTUP =====
+# ── Startup ───────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     init_db()
     print(f"Database ready at: {DB_PATH}")

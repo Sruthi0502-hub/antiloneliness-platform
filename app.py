@@ -1,23 +1,30 @@
 """
-Sentimate - Anti-Loneliness Platform
-A web application designed to combat loneliness in elderly users through
-chat, medication reminders, brain games, and activity monitoring.
+app.py – Sentimate
+Flask application factory and route definitions.
 
-Features:
-- User authentication (register, login, logout)
-- Emotional support through AI chatbot with voice input/output
-- Medication reminder management (per-user, SQLite-backed)
-- Brain games for cognitive engagement
-- Inactivity detection with alerts
-- Elderly-friendly interface design
+Structure:
+  [1] App setup & logging
+  [2] Auth decorator
+  [3] Auth routes         – /register  /login  /logout
+  [4] Page routes         – /  /chat  /medication  /reminder  /dashboard
+  [5] Games routes        – /games  /traditional_games  /pallanguli  /gilli
+  [6] Activity endpoints  – /update_activity  /check_inactivity  /activity_status  /reset_inactivity
+  [7] Reminder endpoints  – /add_reminder  /get_reminders  /delete_reminder/<id>
+  [8] Chat endpoints      – /get_response  /get_history
+  [9] Language endpoints  – /save_language  /get_language
+  [10] Voice endpoints    – /speak_response  /voice_chat  /voice_chat_health
+  [11] Error handlers     – 400  404  405  500
 """
 
-import base64
-import io
+import logging
+import logging.handlers
+import os
 from functools import wraps
-from typing import Dict, Any, Tuple
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+from flask import (
+    Flask, render_template, request, jsonify,
+    session, redirect, url_for, flash,
+)
 
 from chatbot import get_response
 from medication_reminders import add_reminder, get_all_reminders, delete_reminder
@@ -28,22 +35,53 @@ from database import (
     init_db, save_message, get_chat_history, get_recent_messages,
     save_user_preference, get_user_preference,
 )
-from config import DEBUG, HOST, PORT, SECRET_KEY
+from helpers import api_err, parse_json_body, get_user_language, text_to_speech_b64, check_module
+from config import DEBUG, HOST, PORT, SECRET_KEY, MAX_MESSAGE_LENGTH
 
-# ===== FLASK APP SETUP =====
+
+# ── [1] App setup & logging ───────────────────────────────────────────────────
+
+def _configure_logging() -> None:
+    """Set up console + rotating-file logging for the application."""
+    os.makedirs('logs', exist_ok=True)
+    fmt = logging.Formatter(
+        '[%(asctime)s] %(levelname)s %(name)s – %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+    )
+    level = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper(), logging.INFO)
+
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+
+    file_handler = logging.handlers.RotatingFileHandler(
+        'logs/sentimate.log', maxBytes=2_000_000, backupCount=3, encoding='utf-8'
+    )
+    file_handler.setFormatter(fmt)
+
+    root = logging.getLogger()
+    root.setLevel(level)
+    root.addHandler(console)
+    root.addHandler(file_handler)
+
+
+_configure_logging()
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = SECRET_KEY
-app.config['JSON_SORT_KEYS'] = False
+app.config.update(
+    JSON_SORT_KEYS=False,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 
-# Initialise database on startup
 init_db()
 
 
-# ===== AUTH DECORATOR =====
+# ── [2] Auth decorator ────────────────────────────────────────────────────────
 
 def login_required(f):
-    """Redirect to login page if user is not authenticated."""
+    """Redirect unauthenticated requests to the login page."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
@@ -53,7 +91,7 @@ def login_required(f):
     return decorated
 
 
-# ===== AUTH ROUTES =====
+# ── [3] Auth routes ───────────────────────────────────────────────────────────
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -67,12 +105,9 @@ def register():
         confirm  = request.form.get('confirm_password', '')
 
         success, message, user = register_user(username, password, confirm)
-
+        flash(message, 'success' if success else 'error')
         if success:
-            flash(message, 'success')
             return redirect(url_for('login'))
-        else:
-            flash(message, 'error')
 
     return render_template('register.html')
 
@@ -88,14 +123,13 @@ def login():
         password = request.form.get('password', '')
 
         success, message, user = authenticate_user(username, password)
-
         if success:
-            session['user_id']   = user['id']
-            session['username']  = user['username']
+            session['user_id']  = user['id']
+            session['username'] = user['username']
             flash(f"Welcome back, {user['username']}!", 'success')
             return redirect(url_for('home'))
-        else:
-            flash(message, 'error')
+
+        flash(message, 'error')
 
     return render_template('login.html')
 
@@ -104,212 +138,208 @@ def login():
 @login_required
 def logout():
     """Clear session and redirect to login."""
+    username = session.get('username', 'unknown')
     session.clear()
+    logger.info("User logged out: %s", username)
     flash('You have been logged out. See you soon!', 'info')
     return redirect(url_for('login'))
 
 
-# ===== PAGE ROUTES (protected) =====
+# ── [4] Page routes ───────────────────────────────────────────────────────────
 
 @app.route('/')
 @login_required
-def home() -> str:
-    """Render the home page with navigation and feature buttons."""
+def home():
     return render_template('home.html')
 
 
 @app.route('/chat')
 @login_required
-def chat() -> str:
-    """Render the chat companion page for conversations."""
+def chat():
     history = get_chat_history(session['user_id'], limit=50)
     return render_template('chat.html', history=history)
 
 
 @app.route('/medication')
 @login_required
-def medication() -> str:
-    """Render the medication reminder management page."""
+def medication():
     return render_template('medication.html')
 
 
 @app.route('/reminder')
 @login_required
-def reminder() -> str:
-    """Alias route for medication reminders for backward compatibility."""
-    return render_template('medication.html')
-
-
-@app.route('/games')
-@login_required
-def games() -> str:
-    """Render the brain games page with quiz."""
-    return render_template('games.html')
+def reminder():
+    """Backward-compat alias for /medication."""
+    return redirect(url_for('medication'))
 
 
 @app.route('/dashboard')
 @login_required
-def dashboard() -> str:
-    """Render the user dashboard with quick-access buttons."""
+def dashboard():
     return render_template('dashboard.html')
+
+
+# ── [5] Games routes ──────────────────────────────────────────────────────────
+
+@app.route('/games')
+@login_required
+def games():
+    return render_template('games.html')
 
 
 @app.route('/traditional_games')
 @login_required
-def traditional_games() -> str:
-    """Render the traditional games homepage (Pallanguli, Gilli)."""
+def traditional_games():
     return render_template('traditional_games.html')
 
 
 @app.route('/pallanguli')
 @login_required
-def pallanguli() -> str:
-    """Render the Pallanguli (mancala) game page."""
+def pallanguli():
     return render_template('pallanguli.html')
 
 
 @app.route('/gilli')
 @login_required
-def gilli() -> str:
-    """Render the Gilli-Danda game page."""
+def gilli():
     return render_template('gilli.html')
 
 
-# ===== ACTIVITY TRACKING ENDPOINTS =====
+# ── [6] Activity tracking endpoints ──────────────────────────────────────────
 
 @app.route('/update_activity', methods=['POST'])
 def update_activity_route():
-    """Update user activity timestamp to current time."""
+    """Update the user's last-activity timestamp."""
     try:
-        data = request.get_json()
-        user_id = data.get('user_id') if data else None
-        result = update_activity(user_id=user_id)
+        data    = request.get_json(silent=True) or {}
+        user_id = data.get('user_id')
+        result  = update_activity(user_id=user_id)
         return jsonify({'success': True, 'last_activity': result['last_activity']}), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to update activity', 'details': str(e)}), 500
+    except Exception as exc:
+        logger.error("update_activity failed: %s", exc)
+        return api_err('Failed to update activity', 500)
+
 
 @app.route('/check_inactivity', methods=['GET'])
 def check_inactivity_route():
-    """Check if user has been inactive for the threshold time."""
+    """Return whether the user has been inactive beyond the threshold."""
     try:
-        status = check_inactivity()
-        return jsonify(status), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to check inactivity', 'details': str(e)}), 500
+        return jsonify(check_inactivity()), 200
+    except Exception as exc:
+        logger.error("check_inactivity failed: %s", exc)
+        return api_err('Failed to check inactivity', 500)
+
 
 @app.route('/activity_status', methods=['GET'])
 def activity_status_route():
-    """Get full activity status including last activity time and inactivity check."""
+    """Return full activity status details."""
     try:
-        status = get_activity_status()
-        return jsonify(status), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to get activity status', 'details': str(e)}), 500
+        return jsonify(get_activity_status()), 200
+    except Exception as exc:
+        logger.error("activity_status failed: %s", exc)
+        return api_err('Failed to get activity status', 500)
+
 
 @app.route('/reset_inactivity', methods=['POST'])
 def reset_inactivity_route():
-    """Reset inactivity timer by updating activity to current time."""
+    """Reset the inactivity timer."""
     try:
         result = reset_inactivity()
         return jsonify({'success': True, 'last_activity': result['last_activity']}), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to reset inactivity', 'details': str(e)}), 500
+    except Exception as exc:
+        logger.error("reset_inactivity failed: %s", exc)
+        return api_err('Failed to reset inactivity', 500)
 
 
-# ===== REMINDER MANAGEMENT ENDPOINTS =====
+# ── [7] Reminder endpoints ────────────────────────────────────────────────────
 
 @app.route('/add_reminder', methods=['POST'])
 @login_required
 def add_reminder_route():
-    """Add a new medication reminder."""
+    """Add a new medication reminder for the current user."""
+    data, err = parse_json_body()
+    if err:
+        return err
+
+    medicine_name = data.get('medicine_name', '').strip()
+    time          = data.get('time', '').strip()
+
+    if not medicine_name:
+        return api_err('Medicine name is required')
+    if not time:
+        return api_err('Time is required')
+    if len(medicine_name) > 100:
+        return api_err('Medicine name is too long (max 100 characters)')
+
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
+        reminder = add_reminder(medicine_name, time)
+        return jsonify({'success': True, 'reminder': reminder}), 201
+    except ValueError as exc:
+        return api_err(str(exc), 400)
+    except Exception as exc:
+        logger.error("add_reminder failed: %s", exc)
+        return api_err('Failed to save reminder', 500)
 
-        medicine_name = data.get('medicine_name', '').strip()
-        time          = data.get('time', '').strip()
-
-        if not medicine_name:
-            return jsonify({'error': 'Medicine name is required'}), 400
-        if not time:
-            return jsonify({'error': 'Time is required'}), 400
-
-        try:
-            reminder = add_reminder(medicine_name, time)
-            return jsonify({'success': True, 'reminder': reminder}), 201
-        except ValueError as e:
-            return jsonify({'error': str(e)}), 400
-
-    except Exception as e:
-        return jsonify({'error': 'Failed to add reminder', 'details': str(e)}), 500
 
 @app.route('/get_reminders', methods=['GET'])
 @login_required
 def get_reminders_route():
-    """Retrieve all stored medication reminders, sorted by time."""
+    """Return all medication reminders for the current user."""
     try:
-        reminders = get_all_reminders()
-        return jsonify({'reminders': reminders}), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to retrieve reminders', 'details': str(e)}), 500
+        return jsonify({'reminders': get_all_reminders()}), 200
+    except Exception as exc:
+        logger.error("get_reminders failed: %s", exc)
+        return api_err('Failed to retrieve reminders', 500)
+
 
 @app.route('/delete_reminder/<int:reminder_id>', methods=['DELETE'])
 @login_required
-def delete_reminder_route(reminder_id):
-    """Delete a medication reminder by ID."""
+def delete_reminder_route(reminder_id: int):
+    """Delete a reminder by ID (must belong to the current user)."""
     try:
         success = delete_reminder(reminder_id)
         if success:
             return jsonify({'success': True}), 200
-        else:
-            return jsonify({'error': 'Reminder not found'}), 404
-    except Exception as e:
-        return jsonify({'error': 'Failed to delete reminder', 'details': str(e)}), 500
+        return api_err('Reminder not found', 404)
+    except Exception as exc:
+        logger.error("delete_reminder(%s) failed: %s", reminder_id, exc)
+        return api_err('Failed to delete reminder', 500)
 
 
-# ===== CHATBOT ENDPOINTS =====
+# ── [8] Chat endpoints ────────────────────────────────────────────────────────
 
 @app.route('/get_response', methods=['POST'])
 @login_required
 def get_chatbot_response():
     """
-    Get context-aware chatbot response and persist both messages to DB.
-
+    Get an AI chatbot response and persist both messages.
     Expects JSON: {"message": "..."}
     Returns JSON: {"response": str, "language": str}
     """
+    data, err = parse_json_body()
+    if err:
+        return jsonify({'response': 'Please send a message.'}), 400
+
+    user_message = data.get('message', '').strip()
+    if not user_message:
+        return jsonify({'response': 'Please type a message!'}), 400
+    if len(user_message) > MAX_MESSAGE_LENGTH:
+        return jsonify({'response': 'Your message is too long. Please shorten it.'}), 400
+
+    user_id      = session.get('user_id')
+    username     = session.get('username', '')
+    display_name = session.get('display_name')
+    lang_pref    = get_user_language(user_id)
+
+    # Fetch recent context for the chatbot
+    recent_history = []
+    if user_id:
+        try:
+            recent_history = get_recent_messages(user_id, limit=10)
+        except Exception as exc:
+            logger.warning("Could not load chat history for user %s: %s", user_id, exc)
+
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({'response': 'Please send a message'}), 400
-
-        user_message = data.get('message', '').strip()
-        if not user_message:
-            return jsonify({'response': 'Please type a message!'}), 400
-
-        user_id      = session.get('user_id')
-        username     = session.get('username', '')
-        display_name = session.get('display_name')
-
-        # Get user's language preference (session cache → DB fallback)
-        lang_pref = session.get('lang_pref')
-        if not lang_pref and user_id:
-            try:
-                lang_pref = get_user_preference(user_id, 'language', 'english')
-                session['lang_pref'] = lang_pref
-            except Exception:
-                lang_pref = 'english'
-
-        # Fetch recent history for context window
-        recent_history = []
-        if user_id:
-            try:
-                recent_history = get_recent_messages(user_id, limit=10)
-            except Exception:
-                pass
-
-        # Get context-aware bot response (language preference applied)
         result = get_response(
             user_message,
             username=username,
@@ -317,207 +347,199 @@ def get_chatbot_response():
             display_name=display_name,
             forced_language=lang_pref,
         )
-
-        bot_response   = result['response']
-        detected_name  = result.get('detected_name')
-        language       = result.get('language', 'english')
-
-        # Store detected name in session for future turns
-        if detected_name:
-            session['display_name'] = detected_name
-
-        # Persist both messages to DB
-        if user_id:
-            try:
-                save_message(user_id, 'user', user_message)
-                save_message(user_id, 'bot', bot_response)
-            except Exception:
-                pass
-
-        return jsonify({'response': bot_response, 'language': language}), 200
-
-    except Exception as e:
+    except Exception as exc:
+        logger.error("Chatbot get_response failed: %s", exc)
         return jsonify({'response': 'Sorry, I had trouble responding. Please try again.'}), 500
 
+    bot_response  = result['response']
+    language      = result.get('language', 'english')
+    detected_name = result.get('detected_name')
 
-# ===== LANGUAGE PREFERENCE ENDPOINTS =====
+    if detected_name:
+        session['display_name'] = detected_name
+
+    if user_id:
+        try:
+            save_message(user_id, 'user', user_message)
+            save_message(user_id, 'bot', bot_response)
+        except Exception as exc:
+            logger.warning("Failed to save messages for user %s: %s", user_id, exc)
+
+    return jsonify({'response': bot_response, 'language': language}), 200
+
+
+@app.route('/get_history', methods=['GET'])
+@login_required
+def get_history_route():
+    """
+    Return chat history as JSON.
+    Optional query param: ?limit=N  (1–200, default 50)
+    """
+    try:
+        limit   = max(1, min(int(request.args.get('limit', 50)), 200))
+        history = get_chat_history(session['user_id'], limit=limit)
+        return jsonify({'history': history, 'count': len(history)}), 200
+    except ValueError:
+        return api_err("'limit' must be an integer", 400)
+    except Exception as exc:
+        logger.error("get_history failed: %s", exc)
+        return api_err('Failed to load history', 500)
+
+
+@app.route('/chat_history', methods=['GET'])
+@login_required
+def chat_history_route():
+    """Backward-compat alias – delegates to /get_history."""
+    return redirect(url_for('get_history_route', **request.args))
+
+
+# ── [9] Language endpoints ────────────────────────────────────────────────────
+
+_VALID_LANGUAGES = frozenset({'english', 'tamil'})
+
 
 @app.route('/save_language', methods=['POST'])
 @login_required
 def save_language_route():
     """
-    Save user's language preference to DB and session.
+    Persist the user's language preference.
     Expects JSON: {"language": "english"|"tamil"}
     """
-    try:
-        data     = request.get_json()
-        language = (data.get('language', 'english') if data else 'english').lower().strip()
-        if language not in ('english', 'tamil'):
-            return jsonify({'error': 'Invalid language. Use "english" or "tamil".'}), 400
+    data, err = parse_json_body()
+    if err:
+        return err
 
-        user_id = session.get('user_id')
+    language = (data.get('language', 'english') or 'english').lower().strip()
+    if language not in _VALID_LANGUAGES:
+        return api_err(f'Invalid language. Supported: {", ".join(sorted(_VALID_LANGUAGES))}')
+
+    user_id = session.get('user_id')
+    try:
         if user_id:
             save_user_preference(user_id, 'language', language)
         session['lang_pref'] = language
         return jsonify({'success': True, 'language': language}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception as exc:
+        logger.error("save_language failed for user %s: %s", user_id, exc)
+        return api_err('Failed to save language preference', 500)
 
 
 @app.route('/get_language', methods=['GET'])
 @login_required
 def get_language_route():
     """Return the user's saved language preference."""
-    try:
-        lang_pref = session.get('lang_pref')
-        if not lang_pref:
-            user_id   = session.get('user_id')
-            lang_pref = get_user_preference(user_id, 'language', 'english') if user_id else 'english'
-            session['lang_pref'] = lang_pref
-        return jsonify({'language': lang_pref}), 200
-    except Exception as e:
-        return jsonify({'language': 'english'}), 200
+    lang = get_user_language(session.get('user_id'))
+    return jsonify({'language': lang}), 200
 
 
-# ===== CHAT HISTORY API =====
-
-@app.route('/get_history', methods=['GET'])
-@login_required
-def get_history_route():
-    """
-    Return the logged-in user's chat history as JSON.
-    Optional query param: ?limit=N (default 50)
-    """
-    try:
-        limit = min(int(request.args.get('limit', 50)), 200)
-        history = get_chat_history(session['user_id'], limit=limit)
-
-        return jsonify({'history': history, 'count': len(history)}), 200
-    except Exception as e:
-        return jsonify({'error': 'Failed to load history', 'details': str(e)}), 500
-
-
-# ===== VOICE CHATBOT ENDPOINTS =====
+# ── [10] Voice endpoints ──────────────────────────────────────────────────────
 
 @app.route('/speak_response', methods=['POST'])
 @login_required
 def speak_response_route():
     """
-    Convert text to speech using gTTS and return base64-encoded MP3.
-
+    Convert text to speech. Returns base64-encoded MP3.
     Expects JSON: {"text": "...", "language": "english"|"tamil"}
-    Returns JSON: {"audio_b64": "...", "success": true}
     """
+    data, err = parse_json_body()
+    if err:
+        return err
+
+    text     = (data.get('text', '') or '').strip()
+    language = (data.get('language', 'english') or 'english').lower()
+
+    if not text:
+        return api_err('No text provided')
+    if len(text) > 1000:
+        return api_err('Text is too long for TTS (max 1000 characters)')
+
     try:
-        from gtts import gTTS
-
-        data     = request.get_json()
-        text     = (data.get('text', '') if data else '').strip()
-        language = (data.get('language', 'english') if data else 'english').lower()
-
-        if not text:
-            return jsonify({'success': False, 'error': 'No text provided'}), 400
-
-        lang_code = 'ta' if language == 'tamil' else 'en'
-
-        tts = gTTS(text=text, lang=lang_code, slow=False)
-        audio_buffer = io.BytesIO()
-        tts.write_to_fp(audio_buffer)
-        audio_buffer.seek(0)
-
-        audio_b64 = base64.b64encode(audio_buffer.read()).decode('utf-8')
-
+        audio_b64 = text_to_speech_b64(text, language)
         return jsonify({'success': True, 'audio_b64': audio_b64}), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    except ImportError:
+        logger.warning("gTTS not installed – TTS endpoint unavailable")
+        return api_err('TTS library not installed on this server', 503)
+    except Exception as exc:
+        logger.error("speak_response failed: %s", exc)
+        return api_err(f'TTS error: {exc}', 500)
 
 
 @app.route('/voice_chat', methods=['POST'])
 @login_required
 def voice_chat_route():
-    """Complete voice conversation endpoint (server-side mic capture)."""
+    """Complete voice conversation (server-side mic capture)."""
+    data     = (request.get_json(silent=True) or {})
+    language = data.get('language', 'english').lower()
+
     try:
-        data     = request.get_json()
-        language = data.get('language', 'english').lower() if data else 'english'
-        result   = voice_chat_json_api(language)
-
-        if result['success']:
-            return jsonify(result), 200
-        else:
-            return jsonify(result), 400
-
-    except Exception as e:
+        result = voice_chat_json_api(language)
+        status = 200 if result.get('success') else 400
+        return jsonify(result), status
+    except Exception as exc:
+        logger.error("voice_chat failed: %s", exc)
         return jsonify({
-            'success': False, 'user_input': None,
-            'chatbot_response': None, 'language': 'english',
-            'message': f'Voice chat error: {str(e)}'
+            'success':          False,
+            'user_input':       None,
+            'chatbot_response': None,
+            'language':         language,
+            'message':          f'Voice chat error: {exc}',
         }), 500
 
 
 @app.route('/voice_chat_health', methods=['GET'])
 def voice_chat_health_route():
-    """Check voice chat system health."""
-    try:
-        try:
-            from voice_assistant import listen_voice
-            voice_assistant_ok = True
-        except ImportError:
-            voice_assistant_ok = False
+    """Health check for all voice-related modules."""
+    voice_ok = check_module('voice_assistant', 'listen_voice')
+    chat_ok  = check_module('chatbot', 'get_response')
+    tts_ok   = check_module('text_to_speech', 'speak_text')
 
-        try:
-            from chatbot import get_response as _gr
-            chatbot_ok = True
-        except ImportError:
-            chatbot_ok = False
-
-        try:
-            from text_to_speech import speak_text
-            text_to_speech_ok = True
-        except ImportError:
-            text_to_speech_ok = False
-
-        all_ok = voice_assistant_ok and chatbot_ok and text_to_speech_ok
-        return jsonify({
-            'status': 'healthy' if all_ok else 'degraded',
-            'supported_languages': ['english', 'tamil'],
-            'voice_assistant': voice_assistant_ok,
-            'chatbot': chatbot_ok,
-            'text_to_speech': text_to_speech_ok,
-            'message': 'All systems operational' if all_ok else 'Some modules unavailable'
-        }), 200
-
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+    all_ok = voice_ok and chat_ok and tts_ok
+    return jsonify({
+        'status':               'healthy' if all_ok else 'degraded',
+        'supported_languages':  ['english', 'tamil'],
+        'voice_assistant':      voice_ok,
+        'chatbot':              chat_ok,
+        'text_to_speech':       tts_ok,
+        'message':              'All systems operational' if all_ok else 'Some modules unavailable',
+    }), 200
 
 
-# ===== CHAT HISTORY ENDPOINT =====
+# ── [11] Error handlers ───────────────────────────────────────────────────────
 
-@app.route('/chat_history', methods=['GET'])
-@login_required
-def chat_history_route():
-    """Return the current user's chat history as JSON."""
-    try:
-        history = get_chat_history(session['user_id'], limit=100)
-        return jsonify({'history': history}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+def _wants_json() -> bool:
+    """True when the client prefers a JSON response (API call vs browser)."""
+    best = request.accept_mimetypes.best_match(['application/json', 'text/html'])
+    return best == 'application/json' or request.path.startswith('/api/')
 
 
-# ===== ERROR HANDLERS =====
+@app.errorhandler(400)
+def bad_request(error):
+    if _wants_json():
+        return jsonify({'error': 'Bad request', 'code': 400}), 400
+    return render_template('error.html', code=400, message='Bad Request'), 400
+
 
 @app.errorhandler(404)
 def page_not_found(error):
-    """Handle 404 Not Found errors."""
-    return jsonify({'error': 'Page not found'}), 404
+    if _wants_json():
+        return jsonify({'error': 'Not found', 'code': 404}), 404
+    return render_template('error.html', code=404, message='Page Not Found'), 404
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({'error': 'Method not allowed', 'code': 405}), 405
+
 
 @app.errorhandler(500)
 def internal_error(error):
-    """Handle 500 Internal Server Error."""
-    return jsonify({'error': 'Internal server error'}), 500
+    logger.exception("Unhandled 500 error: %s", error)
+    if _wants_json():
+        return jsonify({'error': 'Internal server error', 'code': 500}), 500
+    return render_template('error.html', code=500, message='Internal Server Error'), 500
 
 
-# ===== APPLICATION ENTRY POINT =====
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
     app.run(debug=DEBUG, host=HOST, port=PORT)

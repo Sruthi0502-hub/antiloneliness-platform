@@ -1,115 +1,145 @@
 """
-Authentication Module for Sentimate
-Handles user registration, login validation, and password security.
+auth.py – Sentimate
+User registration and authentication.
 
-Uses werkzeug's security helpers for safe password hashing (pbkdf2:sha256).
+Security:
+  - werkzeug PBKDF2-SHA256 password hashing (cost factor 260k iterations by default)
+  - Generic login error message to prevent username enumeration
+  - Stronger password rules (min 8 chars, requires letter + digit)
+  - Username: alpha-numeric + hyphen/underscore, 3–30 chars
 """
 
-from typing import Optional, Dict, Any, Tuple
+import re
+import logging
+from typing import Dict, Any, Optional, Tuple
+
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from database import create_user, get_user_by_username
 
+logger = logging.getLogger(__name__)
 
-# ===== VALIDATION HELPERS =====
+
+# ── Constants ─────────────────────────────────────────────────────────────────
 
 MIN_USERNAME_LEN = 3
 MAX_USERNAME_LEN = 30
-MIN_PASSWORD_LEN = 6
+MIN_PASSWORD_LEN = 8          # increased from 6
 
+_USERNAME_RE = re.compile(r'^[A-Za-z0-9_-]+$')
+
+
+# ── Validators ────────────────────────────────────────────────────────────────
 
 def _validate_username(username: str) -> Optional[str]:
-    """Return an error string if username is invalid, else None."""
-    username = username.strip()
+    """Return an error string or None."""
     if not username:
         return "Username is required."
     if len(username) < MIN_USERNAME_LEN:
         return f"Username must be at least {MIN_USERNAME_LEN} characters."
     if len(username) > MAX_USERNAME_LEN:
         return f"Username must be at most {MAX_USERNAME_LEN} characters."
-    if not username.replace('_', '').replace('-', '').isalnum():
-        return "Username can only contain letters, numbers, hyphens, and underscores."
+    if not _USERNAME_RE.match(username):
+        return "Username may only contain letters, numbers, hyphens, and underscores."
     return None
 
 
 def _validate_password(password: str) -> Optional[str]:
-    """Return an error string if password is invalid, else None."""
+    """Return an error string or None."""
     if not password:
         return "Password is required."
     if len(password) < MIN_PASSWORD_LEN:
         return f"Password must be at least {MIN_PASSWORD_LEN} characters."
+    if not re.search(r'[A-Za-z]', password):
+        return "Password must contain at least one letter."
+    if not re.search(r'[0-9]', password):
+        return "Password must contain at least one number."
     return None
 
 
-# ===== REGISTRATION =====
+# ── Registration ──────────────────────────────────────────────────────────────
 
-def register_user(username: str, password: str, confirm_password: str) -> Tuple[bool, str, Optional[Dict]]:
+def register_user(
+    username: str,
+    password: str,
+    confirm_password: str,
+) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
     """
-    Register a new user account.
-
-    Args:
-        username: Desired username
-        password: Chosen password
-        confirm_password: Password confirmation
+    Validate fields, hash the password, and create a new user account.
 
     Returns:
-        (success: bool, message: str, user_data: dict | None)
+        (True, success_message, user_dict)  on success
+        (False, error_message, None)        on failure
     """
-    # Validate username
+    username = username.strip()
+
     err = _validate_username(username)
     if err:
         return False, err, None
 
-    # Validate password
     err = _validate_password(password)
     if err:
         return False, err, None
 
-    # Confirm passwords match
     if password != confirm_password:
         return False, "Passwords do not match.", None
 
-    # Hash password and create account
     try:
         password_hash = generate_password_hash(password)
-        user = create_user(username.strip(), password_hash)
+        user = create_user(username, password_hash)
+        logger.info("New user registered: %s (id=%s)", username, user['id'])
         return True, "Account created successfully! Please log in.", user
-    except ValueError as e:
-        return False, str(e), None
-    except Exception as e:
-        return False, f"Registration failed: {str(e)}", None
+
+    except ValueError as exc:
+        return False, str(exc), None
+
+    except Exception as exc:
+        logger.error("Registration failed for username '%s': %s", username, exc)
+        return False, "Registration failed. Please try again.", None
 
 
-# ===== LOGIN =====
+# ── Authentication ────────────────────────────────────────────────────────────
 
-def authenticate_user(username: str, password: str) -> Tuple[bool, str, Optional[Dict]]:
+_INVALID_CREDS_MSG = "Invalid username or password."
+
+
+def authenticate_user(
+    username: str,
+    password: str,
+) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
     """
-    Verify login credentials.
+    Verify credentials and return a safe user dict (no password_hash).
 
-    Args:
-        username: Username to authenticate
-        password: Plain-text password to verify
+    The same generic error message is returned for both unknown username and
+    wrong password to prevent username enumeration.
 
     Returns:
-        (success: bool, message: str, user_data: dict | None)
+        (True, success_message, safe_user_dict)  on success
+        (False, error_message, None)             on failure
     """
     if not username or not username.strip():
         return False, "Username is required.", None
-
     if not password:
         return False, "Password is required.", None
 
-    user = get_user_by_username(username.strip())
+    try:
+        user = get_user_by_username(username.strip())
+    except Exception as exc:
+        logger.error("Database error during authentication: %s", exc)
+        return False, "Login failed. Please try again.", None
 
-    if user is None:
-        return False, "Invalid username or password.", None
+    # Generic message for both "not found" and "wrong password"
+    if user is None or not check_password_hash(user['password_hash'], password):
+        logger.warning(
+            "Failed login attempt for username '%s'",
+            username.strip(),
+        )
+        return False, _INVALID_CREDS_MSG, None
 
-    if not check_password_hash(user['password_hash'], password):
-        return False, "Invalid username or password.", None
-
-    # Return safe user data (no password hash)
     safe_user = {
-        'id': user['id'],
-        'username': user['username'],
-        'created_at': user['created_at']
+        'id':         user['id'],
+        'username':   user['username'],
+        'created_at': user['created_at'],
     }
+    logger.info("User authenticated: %s (id=%s)", safe_user['username'], safe_user['id'])
     return True, "Login successful!", safe_user
