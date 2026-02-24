@@ -147,6 +147,34 @@ def games() -> str:
     return render_template('games.html')
 
 
+@app.route('/dashboard')
+@login_required
+def dashboard() -> str:
+    """Render the user dashboard with quick-access buttons."""
+    return render_template('dashboard.html')
+
+
+@app.route('/traditional_games')
+@login_required
+def traditional_games() -> str:
+    """Render the traditional games homepage (Pallanguli, Gilli)."""
+    return render_template('traditional_games.html')
+
+
+@app.route('/pallanguli')
+@login_required
+def pallanguli() -> str:
+    """Render the Pallanguli (mancala) game page."""
+    return render_template('pallanguli.html')
+
+
+@app.route('/gilli')
+@login_required
+def gilli() -> str:
+    """Render the Gilli-Danda game page."""
+    return render_template('gilli.html')
+
+
 # ===== ACTIVITY TRACKING ENDPOINTS =====
 
 @app.route('/update_activity', methods=['POST'])

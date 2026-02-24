@@ -4,9 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brain Games - Sentimate</title>
+    <title>Games – Sentimate</title>
     <link rel="stylesheet" href="/static/css/elderly-friendly.css">
     <style>
+        /* ── Games hub banner ── */
+        .games-hub {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hub-card {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-decoration: none;
+            font-size: 1.25em;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+        }
+
+        .hub-card:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .hub-card .hub-icon {
+            font-size: 2em;
+        }
+
+        .hub-card.active-card {
+            outline: 3px solid #6b8e6f;
+        }
+
+        .hub-traditional {
+            background: #f5e6d0;
+            color: #5c3d1e;
+        }
+
+        .hub-brain {
+            background: #c8d4b8;
+            color: #1a1a1a;
+        }
+
+        .hub-section-title {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -308,41 +367,60 @@
         </div>
     </nav>
 
-    <button class="btn-back" onclick="goHome()">← Back</button>
+    <button class="btn-back" onclick="goHome()">← Back to Home</button>
 
     <header>
-        <h1>Brain Games</h1>
+        <h1>🎮 Games</h1>
     </header>
 
     <div class="container">
-        <div class="game-container">
-            <div class="score-bar">
-                <span class="score-text">Score:</span>
-                <span class="score-number"><span id="currentScore">0</span>/10</span>
-            </div>
+        <!-- ── Games Hub ── -->
+        <div class="hub-section-title">Choose a Game Category</div>
+        <div class="games-hub">
+            <a href="/traditional_games" class="hub-card hub-traditional">
+                <span class="hub-icon">🏅</span>
+                Traditional Games
+                <small style="font-size:0.65em; font-weight:500; color:#9a7a5a;">Pallanguli · Gilli</small>
+            </a>
+            <button onclick="document.getElementById('brainSection').scrollIntoView({behavior:'smooth'})"
+                class="hub-card hub-brain active-card">
+                <span class="hub-icon">🧠</span>
+                Brain Quiz
+                <small style="font-size:0.65em; font-weight:500; color:#5a7660;">10-question quiz</small>
+            </button>
+        </div>
 
-            <!-- Quiz Section -->
-            <div id="quizSection">
-                <div id="questionSection" class="question-section active">
-                    <div class="question-counter" id="questionCounter">Question 1 of 10</div>
-                    <div class="question-text" id="questionText"></div>
-                    <div class="options" id="optionsContainer"></div>
-                    <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+        <!-- ── Brain Quiz ── -->
+        <div id="brainSection" style="scroll-margin-top:16px;">
+            <div class="game-container">
+                <div class="score-bar">
+                    <span class="score-text">Score:</span>
+                    <span class="score-number"><span id="currentScore">0</span>/10</span>
                 </div>
 
-                <div id="completionSection" class="completion-section">
-                    <h2>Quiz Complete!</h2>
-                    <div class="completion-message">Great job! You've completed the quiz.</div>
-                    <div class="final-score" id="finalScore">0/10</div>
-                    <div id="feedbackMessage" class="completion-message"></div>
-                    <div class="btn-group-completion">
-                        <button class="btn-restart" onclick="restartQuiz()">Play Again</button>
-                        <button class="btn-restart" style="background-color: #6b8e6f; color: white;"
-                            onclick="goHome()">Back to Home</button>
+                <!-- Quiz Section -->
+                <div id="quizSection">
+                    <div id="questionSection" class="question-section active">
+                        <div class="question-counter" id="questionCounter">Question 1 of 10</div>
+                        <div class="question-text" id="questionText"></div>
+                        <div class="options" id="optionsContainer"></div>
+                        <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                    </div>
+
+                    <div id="completionSection" class="completion-section">
+                        <h2>Quiz Complete!</h2>
+                        <div class="completion-message">Great job! You've completed the quiz.</div>
+                        <div class="final-score" id="finalScore">0/10</div>
+                        <div id="feedbackMessage" class="completion-message"></div>
+                        <div class="btn-group-completion">
+                            <button class="btn-restart" onclick="restartQuiz()">Play Again</button>
+                            <button class="btn-restart" style="background-color: #6b8e6f; color: white;"
+                                onclick="goHome()">Back to Home</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div><!-- /brainSection -->
     </div>
 
     <script>

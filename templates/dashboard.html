@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – Sentimate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f3f0 0%, #e8f0e9 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ── */
+        nav.navbar {
+            background: #6b8e6f;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.6em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 1em;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        /* ── Main content ── */
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* ── Welcome banner ── */
+        .welcome-banner {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-banner .greeting {
+            font-size: 2.4em;
+            color: #3a5c3e;
+            font-weight: 700;
+        }
+
+        .welcome-banner .sub {
+            font-size: 1.2em;
+            color: #7a9e7f;
+            margin-top: 8px;
+        }
+
+        /* ── Dashboard card grid ── */
+        .dashboard-card {
+            background: #fffbf8;
+            border-radius: 24px;
+            padding: 50px 60px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .dash-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: none;
+            border-radius: 18px;
+            padding: 34px 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.25s, box-shadow 0.25s;
+            min-height: 130px;
+        }
+
+        .dash-btn .icon {
+            font-size: 2.4em;
+            line-height: 1;
+        }
+
+        .dash-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        }
+
+        .dash-btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-chat {
+            background: #b8d4c3;
+            color: #1a1a1a;
+        }
+
+        .btn-reminder {
+            background: #d4c8b8;
+            color: #1a1a1a;
+        }
+
+        .btn-games {
+            background: #c8d4b8;
+            color: #1a1a1a;
+        }
+
+        .btn-voice {
+            background: #c8c0d8;
+            color: #1a1a1a;
+        }
+
+        @media (max-width: 600px) {
+            .btn-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-card {
+                padding: 36px 24px;
+            }
+
+            .welcome-banner .greeting {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">Sentimate</div>
+        <div class="navbar-menu">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/dashboard" class="nav-link">Dashboard</a>
+            <a href="/games" class="nav-link">Games</a>
+            {% if session.username %}
+            <span class="nav-link" style="color:rgba(255,255,255,0.9); font-weight:600;">👤 {{ session.username
+                }}</span>
+            <a href="/logout" class="nav-link" style="color:#ffcdd2; font-weight:600;">Logout</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="container">
+        <div class="welcome-banner">
+            <div class="greeting">
+                Welcome back, {{ session.username or 'Friend' }}! 👋
+            </div>
+            <div class="sub">What would you like to do today?</div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="btn-grid">
+                <a href="/chat" class="dash-btn btn-chat">
+                    <span class="icon">💬</span>
+                    Chat
+                </a>
+                <a href="/medication" class="dash-btn btn-reminder">
+                    <span class="icon">💊</span>
+                    Reminders
+                </a>
+                <a href="/games" class="dash-btn btn-games">
+                    <span class="icon">🎮</span>
+                    Games
+                </a>
+                <a href="/voice_assistant" class="dash-btn btn-voice">
+                    <span class="icon">🎙️</span>
+                    Voice Assistant
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
