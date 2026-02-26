@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentimate – Your AI Companion</title>
+    <meta name="description"
+        content="Sentimate — a warm, emotional AI companion that listens, understands, and brightens your day.">
+
+    <!-- Google Fonts: Nunito (body) + Lora (headings) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Main Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+
+        <!-- Brand -->
+        <a class="nav-brand" href="/" aria-label="Sentimate home">
+            <span class="nav-brand-dot" aria-hidden="true"></span>
+            Sentimate
+        </a>
+
+        <!-- Navigation links -->
+        <div class="nav-links">
+            <a class="nav-link active" href="/chat" aria-current="page">💬 Chat</a>
+            <a class="nav-link" href="/dashboard">📊 Dashboard</a>
+            <a class="nav-link" href="/medication">💊 Reminders</a>
+            <a class="nav-link" href="/games">🎮 Games</a>
+        </div>
+
+        <!-- Right: username + logout -->
+        <div style="display:flex;align-items:center;gap:10px;">
+            {% if session.username %}
+            <span class="nav-user" aria-label="Logged in as {{ session.username }}">
+                👤 {{ session.username }}
+            </span>
+            {% endif %}
+            <a class="ctrl" href="/logout" aria-label="Log out">Log out</a>
+        </div>
+
+    </nav>
+
+    <!-- ============================================================
+       PAGE SHELL
+       ============================================================ -->
+    <main class="page" role="main">
+
+        <!-- =========================================================
+         CHAT CONTAINER — glassmorphism card
+         ========================================================= -->
+        <section class="chat-container" aria-label="Sentimate AI chat">
+
+            <!-- ── Chat Header ────────────────────────────────────── -->
+            <header class="chat-header">
+
+                <div class="chat-header-left">
+                    <!-- Animated avatar -->
+                    <div class="bot-avatar" aria-hidden="true">💜</div>
+
+                    <!-- Bot info -->
+                    <div class="chat-header-info">
+                        <h2>Sentimate</h2>
+                        <p>
+                            <span class="online-dot" aria-hidden="true"></span>
+                            <span>Your AI Companion · Always here for you</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Header controls -->
+                <div class="header-controls">
+
+                    <!-- Language selector -->
+                    <select class="ctrl ctrl-select" id="lang-select" aria-label="Choose language">
+                        <option value="english">🌐 English</option>
+                        <option value="tamil">🇮🇳 Tamil</option>
+                    </select>
+
+                    <!-- Clear chat -->
+                    <button class="ctrl" id="clear-btn" aria-label="Clear chat history">
+                        🗑️ Clear
+                    </button>
+
+                </div>
+            </header>
+
+            <!-- ── Voice Status Bar ───────────────────────────────── -->
+            <div class="voice-bar" id="voice-bar" role="status" aria-live="polite">
+                <span id="voice-bar-text">🎙️ Listening…</span>
+            </div>
+
+            <!-- ── Messages Area ──────────────────────────────────── -->
+            <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-atomic="false"
+                aria-label="Conversation messages">
+
+                <!-- Welcome / empty state (replaced by JS when messages arrive) -->
+                <div class="empty-state" aria-label="Welcome to Sentimate">
+                    <div class="empty-icon" aria-hidden="true">💙</div>
+                    <h3>Hi there, I'm Sentimate</h3>
+                    <p>Your warm AI companion — here to listen, chat, and brighten your day. What's on your mind?</p>
+
+                    <!-- Suggestion chips -->
+                    <div class="suggestions" role="list" aria-label="Conversation starters">
+                        <button class="chip" role="listitem">How are you today?</button>
+                        <button class="chip" role="listitem">Tell me something uplifting 😊</button>
+                        <button class="chip" role="listitem">I feel a bit lonely</button>
+                        <button class="chip" role="listitem">Let's play a word game!</button>
+                    </div>
+                </div>
+
+            </div><!-- /.chat-messages -->
+
+            <!-- ── Input Area ─────────────────────────────────────── -->
+            <div class="input-area">
+
+                <!-- Microphone / voice input -->
+                <button class="mic-btn" id="mic-btn" type="button" title="Voice input" aria-label="Start voice input">
+                    🎙️
+                </button>
+
+                <!-- Text input (auto-grows) -->
+                <textarea class="msg-input" id="msg-input" placeholder="Say something… I'm here 💙" rows="1"
+                    maxlength="1000" aria-label="Type your message" autocomplete="off" spellcheck="true"></textarea>
+
+                <!-- Character counter -->
+                <span class="char-counter" id="char-counter" aria-live="polite" aria-label="Character count">
+                    0 / 1000
+                </span>
+
+                <!-- Send button -->
+                <button class="send-btn" id="send-btn" type="button" aria-label="Send message">
+                    ➤
+                </button>
+
+            </div><!-- /.input-area -->
+
+        </section><!-- /.chat-container -->
+
+    </main><!-- /.page -->
+
+    <!-- ============================================================
+       TOAST NOTIFICATION
+       ============================================================ -->
+    <div class="toast hidden" id="toast" role="status" aria-live="polite" aria-label="Notification">
+        <span aria-hidden="true">💙</span>
+        <span class="toast-text"></span>
+    </div>
+
+    <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+
+</body>
+
+</html>

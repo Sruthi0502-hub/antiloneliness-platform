@@ -1,0 +1,891 @@
+/* ================================================================
+   SENTIMATE — Emotional UI Theme  (theme.css)
+   
+   Philosophy: Warm · Calm · Friendly · Emotional · Relaxing
+   
+   Palette family: Soft Lavender-Peach — blends the serenity of
+   light purple with the warmth of peach and cream, creating a
+   space that feels like a gentle hug.
+   ================================================================ */
+
+/* ── Google Fonts ────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* ================================================================
+   § 1  DESIGN TOKENS  —  the entire colour system lives here
+   ================================================================ */
+:root {
+
+    /* ── PRIMARY  (soft companion-blue → #7FA1FF) ── */
+    --primary: #7FA1FF;
+    /* calm, trustworthy              */
+    --primary-dark: #567ee0;
+    /* hover / pressed                */
+    --primary-light: #a8bfff;
+    /* icons, accents                 */
+    --primary-pale: #eef2ff;
+    /* tinted surface, chips          */
+    --primary-ghost: rgba(127, 161, 255, .12);
+
+    /* ── SECONDARY  (blush peach) ── */
+    --secondary: #f0836e;
+    --secondary-dark: #d96b56;
+    --secondary-light: #f5a898;
+    --secondary-pale: #fdf0ee;
+    --secondary-ghost: rgba(240, 131, 110, .10);
+
+    /* ── ACCENT  (soft lavender → #CDB4DB) ── */
+    --accent: #CDB4DB;
+    /* emotional, gentle              */
+    --accent-dark: #a88cb5;
+    /* hover                          */
+    --accent-pale: #f5eefa;
+    /* very light lavender surface    */
+    --accent-ghost: rgba(205, 180, 219, .14);
+
+    /* ── NEUTRAL (warm cream greys) ── */
+    --neutral-50: #fdfcfb;
+    /* almost white, warm-tinted     */
+    --neutral-100: #f7f4f1;
+    /* page background                */
+    --neutral-200: #ede9e3;
+    /* cards / dividers               */
+    --neutral-300: #d9d3ca;
+    /* borders                        */
+    --neutral-400: #b5ada2;
+    /* placeholder, disabled          */
+    --neutral-500: #8c8278;
+    /* muted text                     */
+    --neutral-700: #4a4540;
+    /* body text                      */
+    --neutral-900: #251f1b;
+    /* headings                       */
+
+    /* ── SEMANTIC ── */
+    --success: #5cb87a;
+    --success-pale: #edf7f1;
+    --warning: #e8a030;
+    --warning-pale: #fef7e8;
+    --danger: #e05a5a;
+    --danger-pale: #fdeaea;
+    --info: var(--primary);
+    --info-pale: var(--primary-pale);
+
+    /* ── SURFACES ── */
+    --bg-page: var(--neutral-100);
+    --bg-surface: #ffffff;
+    --bg-overlay: rgba(37, 31, 27, .45);
+
+    /* ── TEXT ── */
+    --text-heading: var(--neutral-900);
+    --text-body: var(--neutral-700);
+    --text-muted: var(--neutral-500);
+    --text-on-primary: #ffffff;
+    --text-on-secondary: #ffffff;
+
+    /* ── BORDERS ── */
+    --border-sm: var(--neutral-200);
+    --border-md: var(--neutral-300);
+    --border-focus: var(--primary);
+
+    /* ── ELEVATIONS / SHADOWS ── */
+    --shadow-xs: 0 1px 3px rgba(127, 161, 255, .07), 0 1px 2px rgba(0, 0, 0, .04);
+    --shadow-sm: 0 2px 8px rgba(127, 161, 255, .10), 0 1px 3px rgba(0, 0, 0, .04);
+    --shadow-md: 0 4px 18px rgba(127, 161, 255, .14), 0 2px 6px rgba(0, 0, 0, .05);
+    --shadow-lg: 0 8px 32px rgba(127, 161, 255, .18), 0 4px 10px rgba(0, 0, 0, .06);
+    --shadow-xl: 0 16px 56px rgba(127, 161, 255, .20), 0 6px 16px rgba(0, 0, 0, .07);
+
+    /* ── GRADIENTS ── */
+    --gradient-page:
+        linear-gradient(135deg,
+            #eef2ff 0%,
+            /* soft blue      */
+            #f5eefa 35%,
+            /* light lavender */
+            #fdf0ee 70%,
+            /* warm peach     */
+            #fdfcfb 100%
+            /* clean white    */
+        );
+
+    --gradient-primary: linear-gradient(135deg, #7FA1FF 0%, #a8bfff 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #f5a898 100%);
+    --gradient-accent: linear-gradient(135deg, #CDB4DB 0%, #e2d1f0 100%);
+    --gradient-hero: linear-gradient(135deg, #7FA1FF 0%, #CDB4DB 55%, #f0836e 100%);
+    --gradient-warm: linear-gradient(135deg, #f5eefa 0%, #fdf0ee 100%);
+    --gradient-chat-bot: linear-gradient(135deg, #f8f9ff 0%, #f5eefa 100%);
+
+    /* ── TYPOGRAPHY ── */
+    --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+    --font-display: 'Lora', Georgia, serif;
+    /* for emotional headings */
+
+    --fs-xs: .875rem;
+    /* 14px */
+    --fs-sm: 1.000rem;
+    /* 16px */
+    --fs-base: 1.125rem;
+    /* 18px */
+    --fs-md: 1.250rem;
+    /* 20px */
+    --fs-lg: 1.375rem;
+    /* 22px */
+    --fs-xl: 1.625rem;
+    /* 26px */
+    --fs-2xl: 2.000rem;
+    /* 32px */
+    --fs-3xl: 2.500rem;
+    /* 40px */
+
+    --fw-light: 300;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semi: 600;
+    --fw-bold: 700;
+    --fw-heavy: 800;
+
+    --lh-tight: 1.30;
+    --lh-normal: 1.60;
+    --lh-loose: 1.75;
+
+    /* ── SPACING ── */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 28px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* ── BORDER RADIUS ── */
+    --r-xs: 6px;
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 22px;
+    --r-xl: 30px;
+    --r-full: 9999px;
+
+    /* ── TRANSITIONS ── */
+    --ease-fast: 150ms ease;
+    --ease-normal: 250ms ease;
+    --ease-slow: 400ms ease;
+
+    /* ── Z-INDEX ── */
+    --z-dropdown: 200;
+    --z-sticky: 300;
+    --z-overlay: 800;
+    --z-modal: 900;
+}
+
+/* ================================================================
+   § 2  GLOBAL RESET + BASE
+   ================================================================ */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-normal);
+    line-height: var(--lh-normal);
+    color: var(--text-body);
+    background: var(--gradient-page);
+    background-attachment: fixed;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Headings ─────────────────────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-display);
+    font-weight: var(--fw-bold);
+    color: var(--text-heading);
+    line-height: var(--lh-tight);
+}
+
+h1 {
+    font-size: var(--fs-3xl);
+    margin-bottom: var(--space-5);
+}
+
+h2 {
+    font-size: var(--fs-2xl);
+    margin-bottom: var(--space-4);
+}
+
+h3 {
+    font-size: var(--fs-xl);
+    margin-bottom: var(--space-3);
+}
+
+h4 {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--space-3);
+}
+
+p {
+    margin-bottom: var(--space-4);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--ease-fast);
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ================================================================
+   § 3  NAVIGATION BAR
+   ================================================================ */
+.navbar {
+    background: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1.5px solid var(--border-sm);
+    padding: 0 var(--space-8);
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-brand {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    letter-spacing: -.2px;
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+}
+
+.nav-link {
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    color: var(--text-body);
+    padding: 8px 16px;
+    border-radius: var(--r-full);
+    transition: background var(--ease-fast), color var(--ease-fast);
+    display: inline-block;
+}
+
+.nav-link:hover {
+    background: var(--primary-pale);
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.nav-link.active {
+    background: var(--primary-pale);
+    color: var(--primary);
+}
+
+/* ================================================================
+   § 4  BUTTONS
+   ================================================================ */
+button,
+input[type="submit"],
+input[type="button"] {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semi);
+    border: none;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    padding: 13px 28px;
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: all var(--ease-normal);
+    box-shadow: var(--shadow-xs);
+    line-height: 1;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+}
+
+button:disabled {
+    opacity: .48;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Variants */
+.btn-primary {
+    background: var(--gradient-primary);
+    color: var(--text-on-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
+}
+
+.btn-secondary {
+    background: var(--gradient-secondary);
+    color: var(--text-on-secondary);
+}
+
+.btn-accent {
+    background: var(--gradient-accent);
+    color: var(--text-on-primary);
+}
+
+.btn-soft {
+    background: var(--primary-pale);
+    color: var(--primary);
+    box-shadow: none;
+    border: 1.5px solid transparent;
+}
+
+.btn-soft:hover:not(:disabled) {
+    border-color: var(--primary-light);
+    background: #dde1fc;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--primary-pale);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-body);
+    border: 1.5px solid var(--border-md);
+    box-shadow: none;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--neutral-100);
+    border-color: var(--neutral-400);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger), #f08080);
+    color: #fff;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), #7dd49a);
+    color: #fff;
+}
+
+.btn-sm {
+    padding: 8px 18px;
+    min-height: 38px;
+    font-size: var(--fs-sm);
+    border-radius: var(--r-xs);
+}
+
+.btn-lg {
+    padding: 16px 36px;
+    min-height: 60px;
+    font-size: var(--fs-md);
+    border-radius: var(--r-md);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-round {
+    border-radius: var(--r-full);
+}
+
+/* ================================================================
+   § 5  FORM ELEMENTS
+   ================================================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="time"],
+textarea,
+select {
+    width: 100%;
+    padding: 13px 18px;
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    color: var(--text-body);
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--r-sm);
+    transition: border-color var(--ease-fast), box-shadow var(--ease-fast), background var(--ease-fast);
+    line-height: var(--lh-normal);
+    outline: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px var(--primary-ghost);
+    background: #fff;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--neutral-400);
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    color: var(--text-body);
+    margin-bottom: var(--space-2);
+}
+
+/* ================================================================
+   § 6  CARD SURFACES
+   ================================================================ */
+.card {
+    background: var(--bg-surface);
+    border-radius: var(--r-lg);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-md);
+    border: 1.5px solid var(--border-sm);
+}
+
+.card-sm {
+    padding: var(--space-5);
+    border-radius: var(--r-md);
+}
+
+.card-lg {
+    padding: var(--space-10);
+    border-radius: var(--r-xl);
+}
+
+.card-warm {
+    background: var(--gradient-warm);
+    border-color: #e8daf3;
+}
+
+.card-primary {
+    background: var(--primary-pale);
+    border-color: #c5cbfc;
+}
+
+/* ================================================================
+   § 7  HEADER / HERO SECTIONS
+   ================================================================ */
+.page-header {
+    background: var(--gradient-hero);
+    padding: var(--space-10) var(--space-8);
+    border-radius: var(--r-xl);
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: var(--space-8);
+}
+
+.page-header h1 {
+    font-size: var(--fs-3xl);
+    color: white;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .18);
+    margin-bottom: var(--space-3);
+}
+
+.page-header p {
+    font-size: var(--fs-lg);
+    color: rgba(255, 255, 255, .88);
+    margin: 0;
+}
+
+/* ================================================================
+   § 8  CHAT BUBBLES  (for use in chat.html)
+   ================================================================ */
+
+/* User bubble */
+.bubble-user {
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: var(--r-lg) var(--r-lg) var(--r-xs) var(--r-lg);
+    padding: 14px 20px;
+    font-size: var(--fs-md);
+    line-height: var(--lh-normal);
+    box-shadow: var(--shadow-sm);
+    word-break: break-word;
+}
+
+/* Bot bubble */
+.bubble-bot {
+    background: var(--gradient-chat-bot);
+    color: var(--text-body);
+    border: 1.5px solid var(--border-sm);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--r-lg) var(--r-lg) var(--r-lg) var(--r-xs);
+    padding: 14px 20px;
+    font-size: var(--fs-md);
+    line-height: var(--lh-normal);
+    box-shadow: var(--shadow-sm);
+    word-break: break-word;
+}
+
+/* ================================================================
+   § 9  TYPOGRAPHY UTILITIES
+   ================================================================ */
+.text-primary {
+    color: var(--primary);
+}
+
+.text-secondary {
+    color: var(--secondary);
+}
+
+.text-accent {
+    color: var(--accent);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.text-heading {
+    color: var(--text-heading);
+}
+
+.text-body {
+    color: var(--text-body);
+}
+
+.text-sm {
+    font-size: var(--fs-sm);
+}
+
+.text-base {
+    font-size: var(--fs-base);
+}
+
+.text-md {
+    font-size: var(--fs-md);
+}
+
+.text-lg {
+    font-size: var(--fs-lg);
+}
+
+.text-xl {
+    font-size: var(--fs-xl);
+}
+
+.text-2xl {
+    font-size: var(--fs-2xl);
+}
+
+.font-display {
+    font-family: var(--font-display);
+}
+
+.font-bold {
+    font-weight: var(--fw-bold);
+}
+
+.font-semi {
+    font-weight: var(--fw-semi);
+}
+
+.font-light {
+    font-weight: var(--fw-light);
+}
+
+.italic {
+    font-style: italic;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* ================================================================
+   § 10  LAYOUT UTILITIES
+   ================================================================ */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+}
+
+.section {
+    padding: var(--space-10) 0;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-1 {
+    gap: var(--space-2);
+}
+
+.gap-2 {
+    gap: var(--space-4);
+}
+
+.gap-3 {
+    gap: var(--space-6);
+}
+
+.gap-4 {
+    gap: var(--space-8);
+}
+
+/* ================================================================
+   § 11  CHIPS / BADGES
+   ================================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 4px 12px;
+    border-radius: var(--r-full);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semi);
+}
+
+.badge-primary {
+    background: var(--primary-pale);
+    color: var(--primary-dark);
+}
+
+.badge-secondary {
+    background: var(--secondary-pale);
+    color: var(--secondary-dark);
+}
+
+.badge-accent {
+    background: var(--accent-pale);
+    color: var(--accent-dark);
+}
+
+.badge-success {
+    background: var(--success-pale);
+    color: #2d744a;
+}
+
+.badge-danger {
+    background: var(--danger-pale);
+    color: #a53535;
+}
+
+/* Suggestion chips (chat welcome screen) */
+.chip-emotion {
+    padding: 9px 18px;
+    background: var(--secondary-pale);
+    border: 1.5px solid #f0b8b0;
+    border-radius: var(--r-full);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    color: var(--secondary-dark);
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: background var(--ease-fast), transform var(--ease-fast), box-shadow var(--ease-fast);
+}
+
+.chip-emotion:hover {
+    background: #fde0da;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ================================================================
+   § 12  ALERTS / NOTIFICATIONS
+   ================================================================ */
+.alert {
+    padding: var(--space-5) var(--space-6);
+    border-radius: var(--r-md);
+    border-left: 4px solid;
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-5);
+}
+
+.alert-info {
+    background: var(--primary-pale);
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.alert-success {
+    background: var(--success-pale);
+    border-color: var(--success);
+    color: #2a6e3f;
+}
+
+.alert-warning {
+    background: var(--warning-pale);
+    border-color: var(--warning);
+    color: #7a5000;
+}
+
+.alert-danger {
+    background: var(--danger-pale);
+    border-color: var(--danger);
+    color: #8b2020;
+}
+
+.alert-accent {
+    background: var(--accent-pale);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+}
+
+/* ================================================================
+   § 13  FOCUS & ACCESSIBILITY
+   ================================================================ */
+:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: var(--r-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+/* ================================================================
+   § 14  RESPONSIVE TOKENS  (mobile-first adjustments)
+   ================================================================ */
+@media (max-width: 768px) {
+    :root {
+        --fs-3xl: 1.9rem;
+        --fs-2xl: 1.6rem;
+        --fs-xl: 1.35rem;
+        --fs-lg: 1.2rem;
+    }
+
+    .container {
+        padding: 0 var(--space-4);
+    }
+
+    .navbar {
+        padding: 0 var(--space-5);
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --fs-3xl: 1.65rem;
+        --fs-2xl: 1.40rem;
+        --fs-xl: 1.20rem;
+    }
+
+    .navbar-menu {
+        gap: 2px;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        font-size: var(--fs-xs);
+    }
+}
