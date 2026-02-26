@@ -9,10 +9,11 @@ Features:
 - Follow-up questions to keep conversation flowing
 - Per-conversation context window from database history
 """
-
+from ai_chatbot import get_ai_response
 import re
 import random
-from typing import Dict, List, Optional, Tuple, Any
+from ai_chatbot import get_ai_response
+from typing import List, Dict, Optional, Any
 
 
 # ============================================================
@@ -459,25 +460,16 @@ def get_response(
     display_name: Optional[str] = None,
     forced_language: Optional[str] = None,
 ) -> Dict[str, Any]:
+
     """
     Generate a warm, context-aware chatbot response.
-
-    Args:
-        user_message:  The user's input text.
-        username:      Logged-in username from session.
-        history:       List of recent {sender, message} dicts from DB.
-        display_name:  Previously detected first name (from session).
-
-    Returns:
-        dict with keys:
-            "response"      — the bot reply string
-            "detected_name" — extracted name (or None)
-            "language"      — "tamil" | "english"
     """
+
     if not isinstance(user_message, str):
         raise ValueError("message must be a string")
 
     message = user_message.strip()
+
     if not message:
         return {
             "response": "I'm here to listen. Feel free to share whatever's on your mind! 💚",
@@ -485,102 +477,90 @@ def get_response(
             "language": "english",
         }
 
-    # Language resolution: user preference beats auto-detection
-    is_tamil     = True if forced_language == 'tamil' else _is_tamil(message)
+    # Language detection
+    is_tamil = True if forced_language == 'tamil' else _is_tamil(message)
+
     message_lower = message.lower()
-    history      = history or []
-    responses    = TA_RESPONSES if is_tamil else EN_RESPONSES
-    followups    = TA_FOLLOWUPS if is_tamil else EN_FOLLOWUPS
-    lang         = "tamil" if is_tamil else "english"
+    history = history or []
 
-    # -- 1. Name extraction --
-    detected_name: Optional[str] = _extract_name(message_lower if not is_tamil else message)
+    responses = TA_RESPONSES if is_tamil else EN_RESPONSES
+    followups = TA_FOLLOWUPS if is_tamil else EN_FOLLOWUPS
 
-    # ── 2. Name-intro special response ──────────────────────
+    lang = "tamil" if is_tamil else "english"
+
+    # 1️⃣ Name extraction
+    detected_name = _extract_name(message)
+
     effective_name = detected_name or display_name
 
+    # 2️⃣ Category detection
     category = _match_category(message_lower, is_tamil)
 
-    # Special Tamil name intro category
     if category == 'name_intro_ta' and detected_name:
         category = 'name_received'
 
-    # ── 3. Pick base response ───────────────────────────────
+    # 3️⃣ Base response selection
+
     if category == 'name_received' and detected_name:
+
         pool = responses.get('name_received', responses['default'])
+
         base = random.choice(pool).format(name=detected_name)
 
     elif category == 'greetings' and effective_name:
-        # On greetings, sometimes use personalised pool
+
         if random.random() < 0.55:
+
             pool = responses.get('name_greeting', responses['greetings'])
+
             base = random.choice(pool).format(name=effective_name)
+
         else:
-            base = random.choice(responses.get('greetings', responses['default']))
+
+            base = random.choice(
+                responses.get('greetings', responses['default'])
+            )
 
     else:
+
         pool = responses.get(category, responses['default'])
+
         base = random.choice(pool)
 
-    # ── 4. History-aware prefix ─────────────────────────────
+    # 4️⃣ History awareness
+
     history_note = _analyse_history(history) if len(history) >= 3 else None
 
-    # Only inject history note ~35% of the time to keep it natural
     prefix = ""
+
     if history_note and random.random() < 0.35:
+
         prefix = history_note
 
-    # ── 5. Follow-up question (most responses) ──────────────
-    # Skip follow-up if the response already ends with '?'
-    followup = ""
-    if not base.rstrip().endswith('?') and random.random() < 0.75:
-        followup = random.choice(followups)
+    # 5️⃣ Follow-up question
 
-    response_text = prefix + base + followup
+    followup = ""
+
+    if not base.rstrip().endswith('?'):
+
+        if random.random() < 0.75:
+
+            followup = " " + random.choice(followups)
+
+    # 6️⃣ AI Integration
+
+    ai_reply = get_ai_response(message, username)
+
+    # 7️⃣ Final response
+
+    response_text = prefix + base + " " + ai_reply + followup
 
     return {
-        "response":      response_text,
+
+        "response": response_text,
+
         "detected_name": detected_name,
-        "language":      lang,
+
+        "language": lang,
+
     }
-
-
-# ============================================================
-# BACKWARD-COMPATIBLE WRAPPER (keeps old call sites working)
-# ============================================================
-
-def get_simple_response(user_message: str) -> str:
-    """Simple wrapper for backwards compatibility — returns only the text."""
-    return get_response(user_message)["response"]
-
-
-# ============================================================
-# TEST
-# ============================================================
-
-def _test() -> None:
-    tests = [
-        ("Hello!", "testuser", [], None),
-        ("My name is Kamala", "testuser", [], None),
-        ("Hello", "testuser", [], "Kamala"),
-        ("I'm feeling very lonely today", "testuser", [], "Kamala"),
-        ("How are you doing?", "testuser", [
-            {"sender": "user", "message": "I feel sad all the time"},
-        ], "Kamala"),
-        ("வணக்கம்!", "testuser", [], None),
-        ("என் பெயர் அருண்", "testuser", [], None),
-        ("நான் மிகவும் தனிமையாக உணர்கிறேன்", "testuser", [], None),
-        ("Thank you for listening", "testuser", [], "Kamala"),
-    ]
-    print("=== Sentimate Chatbot v2 Test ===\n")
-    for msg, uname, hist, dn in tests:
-        r = get_response(msg, username=uname, history=hist, display_name=dn)
-        print(f"[{r['language']}] User: {msg}")
-        print(f"         Bot : {r['response']}")
-        if r['detected_name']:
-            print(f"         Name detected: {r['detected_name']}")
-        print()
-
-
-if __name__ == "__main__":
-    _test()
